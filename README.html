@@ -1,0 +1,129 @@
+<html>
+ <head>
+   <title>GarminTools</title>
+   <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+ </head>
+ <body>
+  <p>
+  <center>
+  <a href=https://github.com/ironcitysoftware/garmintools>garmintools github</a> &middot;
+  Copyright 2016 Iron City Software LLC &middot; 
+  <code><a href=mailto:ironcitysoftware@gmail.com>ironcitysoftware@gmail.com</a></code> &middot;
+  Last Update: March 2016
+  </center>
+
+  <h1>GarminTools</h1>
+  
+  <h2>Table Of Contents</h2>
+
+  <ul>
+    <li><a href="#disclaimer">Disclaimer</a></li>
+    <li><a href="#description">Description</a></li>
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#db">Garmin Navigation Databases</a></li>
+    <li><a href="#dev">Development Notes</a></li>
+  </ul>
+
+  <a id="disclaimer" />
+  <h2>Disclaimer</h2>
+  <p>
+  The navigation databases produced by this software are for entertainment purposes only.
+  Certified navigation databases require a FAA Letter of Agreement outlined in 
+  <a href=http://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_20-153.pdf>AC 20-153</a>,
+  which requires compliance with 
+  <a href=http://www.iso.org/iso/home/standards/management-standards/iso_9000.htm>ISO 9001</a>
+  and <a href=http://rtca.org/>RTCA</a> DO-200A.  This software has not been certified to either
+  of these standards.
+
+  <a id="description" />
+  <h2>Description</h2>
+  <a href=https://github.com/ironcitysoftware/garmintools>garmintools</a> reads and writes the Garmin navigation database
+  format used in popular GNS 430, GNS 530, GTN 750, and (possibly) G1000 general aviation GPS units.
+  The software will convert between the Garmin format and a Google protocol buffer format.
+
+  <p>The software does not yet convert all parts of the database.  It is an open-sourced work in progress.
+
+  <a id="tools" />
+  <h2>Tools</h2>
+  
+  <ul>
+  <li>
+  Decodes a Garmin navigation database to a binary Google protocol buffer, then convert the protocol buffer to plaintext:
+
+  <pre class="prettyprint">./scripts/NavDataTool decode garmin_avtn_db.bin proto.bin
+./scripts/PrintProto proto.bin &gt; proto.txt</pre>
+  </li>
+
+  <li>
+  Encodes a Google protocol buffer to a Garmin navigation database:
+
+  <pre class="prettyprint">./scripts/NavDataTool encode proto.bin garmin_avtn_db.bin</pre>
+  </li>
+
+  <li>
+  Prints the table of contents of a Garmin navigation database:
+
+  <pre class="prettyprint">./scripts/NavDataTool toc garmin_avtn_db.bin</pre>
+  </li>
+
+  <li>
+  Tests the decoder and encoder by first decoding a Garmin navigation database to a protocol buffer, then
+  encoding the protocol buffer back to a Garmin navigation database, then comparing that the resulting database
+  is identical to the original database.
+
+  <pre class="prettyprint">./scripts/Test garmin_avtn_db.bin</pre>
+  </li>
+  </ul>
+
+  <a id="db">
+  <h2>Garmin Navigation Databases</h2>
+
+  The Garmin navigation database file format is a compact binary encoding of aviation information.
+  The file is divided into optional sections and uses a variety of encoding methods to compress the data.
+  The format is fairly flexible and is believed to be standard in all Garmin aviation products.
+
+  <p>There are at least three sources of a sample Garmin navigation database.
+
+  <ul>
+    <li><b>Jeppesen subscription</b>.  In the Jeppesen Download Manager, select &quot;download only&quot;.
+    The database will be saved to <code>C:\Program Files\Jeppesen\Jdm\.jsum\download\file.bin</code>.
+    This file can be mounted:  As root,
+    <pre class="prettyprint">mkdir /mnt/garmin
+mount file.bin /mnt/garmin
+cp /mnt/garmin/avtn_db.bin /tmp/garmin.bin</pre>
+    <code>avtn_db.bin</code> is the Garmin navigation database.
+    </li>
+
+    <li><b>GNS430/530 simulator</b>.  Garmin offers these as
+<a href=http://www8.garmin.com/include/SimulatorPopup.html>free downloads</a>.  Once installed, look for
+<code>worldwide.bin</code>.  This file is the Garmin navigation database.</li>
+
+    <li><b>GTN750 simulator</b>.  Buried in the Garmin website is a
+<a href=https://buy.garmin.com/en-US/US/prod95993.html>PC trainer for the GTN series</a>.  Once installed, look
+for <code>worldwide.bin</code>.  This file is the Garmin navigation database. 
+It is possible to find a free downloadable copy of the trainer on the web, using your favorite
+search engine.</li>  
+
+  </ul>
+
+  <a id="dev">
+  <h2>Development Notes</h2>
+
+  <ul>
+    <li><code>garmintools.adapters.nativo</code> - This package converts to and from the native Garmin format and internal
+    representations.  The internal representations are protocol buffers or wrapped protocol buffers.</li>
+
+    <li><code>garmintools.adapters.proto</code> - This package converts to and from a Google protocol buffer representation
+    and internal representations.</li>
+ 
+    <li><code>garmintools.normalize</code> - This package is responsible for normalizing and denormalizing file sections.
+    The native format is heavily normalized, with data containing foreign keys to other sections.  The protocol
+    buffer representation is entirely denormalized, with data being repeated as necessary.</li>
+
+    <li><code>garmintools.sections</code> - This package represents custom code necessary for processing individual sections
+    of the Garmin navigation database.
+  </ul>
+
+  <p>Pull requests are welcome but please verify the <code>scripts/Test</code> utility on a Garmin navigation database.
+ </body>
+</html>  

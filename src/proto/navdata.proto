@@ -1,0 +1,242 @@
+//   Copyright 2016 Iron City Software LLC
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+
+syntax = "proto2";
+
+package garmintools;
+
+option java_package = "garmintools";
+option java_outer_classname = "Proto";
+
+// Primary message representing the Garmin navigation data file.
+// "Encoding" refers to translating this protocol buffer to the proprietary
+// Garmin binary file format; "encoded" refers to the Garmin binary file format.
+// It is a goal for this proto to store the entire Garmin navigation data file
+// so that the data file can be decoded and encoded losslessly ("round-tripped").
+message NavigationData {
+  optional Metadata metadata = 1;
+  optional TableOfContents table_of_contents = 2;
+  repeated CoordinateSystem coordinate_system = 3;
+  repeated IcaoRegion icao_region = 4;
+  repeated LandingFacility landing_facility = 5;
+
+  // Truly optional.  When decoding, the string tables are stored here to allow
+  // for lossless encoding even if some of the values are not ever used.
+  // If absent, the tool will build string tables from the enum values actually
+  // used in LandingFacilities.
+  repeated StringConstantSection string_constant_section = 6;
+
+  // Truly optional.  Temporary message so a native file can be round-tripped
+  // through a proto, despite not all sections being understood.
+  // TODO: remove.
+  repeated UnparsedSection unparsed_section = 1000;
+}
+
+message Metadata {
+  optional Date effective_date = 1;
+  optional Date expires_date = 2;
+  optional int32 cycle_number = 3;
+  optional string part_number = 4;
+  optional string copyright_line1 = 5;
+  optional string copyright_line2 = 6;
+
+  // TODO: remove.
+  optional bytes unknown_data_1 = 1000;  
+  optional bytes unknown_data_2 = 1001;
+
+  repeated int32 data_length = 8;
+}
+
+message TableOfContents {
+  optional int32 num_sections = 1;
+
+  // Truly optional.  Several entries in the native table of contents appear to
+  // be lies.  Preserve the lies so the native file can be round-tripped through
+  // a proto.
+  repeated TableOfContentsOverride table_of_contents_override = 2;
+
+  repeated TableOfContentsOverride empty_section_item_length = 3;
+}
+  
+message TableOfContentsOverride {
+  optional int32 section_number = 1;
+  optional int32 item_length = 2;
+  optional int32 item_quantity = 3;
+}
+
+message CoordinateSystem {
+  optional string name = 1;
+  repeated int32 parameters = 2;
+}
+
+message IcaoRegion {
+  optional string region = 1;
+  optional string landing_facility_identifier_prefix = 2;
+}
+
+message Date {
+  optional int32 year = 1;
+  optional int32 month = 2;
+  optional int32 day = 3;
+}
+
+message LandingFacility {
+  optional string identifier = 1;
+
+  optional string name = 2;
+  optional double latitude_degrees = 3;
+  optional double longitude_degrees = 4;
+  optional int32 elevation_feet = 5; 
+  optional bool radar_available = 6;
+  optional bool jet_a_fuel_available = 7;
+  optional bool avgas_fuel_available = 8;
+  enum Airspace {
+    CLASS_C = 1;
+    CTA = 2;
+    TMA = 3;
+    TRSA = 4;
+    CLASS_B = 5;
+  }
+  // The airspace surrounding the airport.
+  optional Airspace airspace = 9;
+  enum LandingFacilityType {
+    PUBLIC = 1;
+    MILITARY = 2;
+    PRIVATE = 3;
+    HELIPORT = 4;
+  }
+  optional LandingFacilityType landing_facility_type = 10;
+  optional string city = 11;
+  optional string state = 12;
+  optional IcaoRegion icao_region = 13;
+  optional LandingFacilityDetail detail = 14;
+  repeated int32 unknown = 1000;
+}
+
+message LandingFacilityDetail {
+  repeated Runway runway = 1;
+  repeated CommunicationFrequency communication_frequency = 2;
+
+  repeated UnknownLandingFacilityDetailSection unknown_section = 1000;
+}
+
+message UnknownLandingFacilityDetailSection {
+  optional int32 section_number = 1;
+  optional bytes data = 2;
+}
+
+message Runway {
+  optional int32 runway_number = 1;
+  enum RunwaySuffix {
+    CENTER = 1;
+    LEFT = 2;
+    RIGHT = 3;
+    TRUE = 4;
+  } 
+  optional RunwaySuffix runway_suffix = 2;
+  optional int32 runway_length_feet = 3;
+  optional int32 runway_width_feet = 4;
+
+  enum RunwayLighting {
+    NO_LIGHTS = 1;
+    PILOT_CONTROLLED_LIGHTING = 2;
+    PART_TIME = 3;
+    FULL_TIME = 4;
+  }
+  optional RunwayLighting runway_lighting = 5;
+
+  enum RunwaySurface {
+    HARD_SURFACE = 1;
+    TURF_SURFACE = 2;
+    SEALED_SURFACE = 3;
+    GRAVEL_SURFACE = 4;
+    DIRT_SURFACE = 5;
+    SOFT_SURFACE = 6;
+    WATER_SURFACE = 7;
+  }
+  optional RunwaySurface runway_surface = 6;
+
+  repeated int32 unknown = 1000;
+  optional bytes unknown_additional_info_1 = 1001;
+  optional bytes unknown_additional_info_2 = 1002;
+  optional bytes unknown_additional_info_3 = 1003;
+}
+
+message CommunicationFrequency {
+  optional int32 frequency_ghz = 1;
+  enum FrequencyType {
+    ATIS = 1;
+    ASOS = 2;
+    AWOS = 3;
+    CLEARANCE = 4;
+    GROUND = 5;
+    TOWER = 6;
+    UNICOM = 7;
+    MULTICOM = 8;
+    FLIGHT_SERVICE_STATION = 9;
+    DEPARTURE = 10;
+    APPROACH = 11;
+    CENTER = 12;
+    PILOT_CONTROLLED_LIGHTING = 13;
+
+    // TODO: go through these and assign more clear constants.
+    GND_COMM = 100;
+    CLASS_C = 101;
+    TRSA = 102;
+    RADAR = 103;
+    HELICOPTER = 104;
+    OPS = 105;
+    RADIO = 106;
+    RAMP = 107;
+    CLASS_B = 108;
+    PRE_TAXI = 109;
+    TERMINAL = 110;
+    GATE = 111;
+    AIRLIFT = 112;
+    ARRIVAL = 113;
+    INFO = 114;
+    CONTROL = 115;
+    AWIS = 116;
+    DIRECTOR = 117;
+    TMA = 118;
+    AWIB = 119;
+    EMERGENCY = 120;
+    CTA = 121;
+  }
+  optional FrequencyType frequency_type = 2;
+  optional bool transmit_only = 3;
+  optional bool receive_only = 4;
+  optional string narrative = 5;
+
+  repeated int32 unknown = 1000;
+  optional bytes unknown_additional_info_1 = 1001;
+  optional bytes unknown_additional_info_2 = 1002;
+  optional bytes unknown_additional_info_3 = 1003;
+  optional bytes unknown_additional_info_4 = 1004;
+  optional bool unknown_additional_info_5 = 1005;
+  optional bool unknown_additional_info_6 = 1006;
+  optional bool unknown_additional_info_7 = 1007;
+}
+
+message StringConstantSection {
+  optional int32 section_number = 1;
+  repeated string constant = 2;
+}
+
+message UnparsedSection {
+  optional int32 section_number = 1;
+  optional int32 item_length = 2;
+  optional int32 item_quantity = 3;
+  optional bytes data = 4;
+}
