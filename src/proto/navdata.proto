@@ -46,16 +46,19 @@ message NavigationData {
 message Metadata {
   optional Date effective_date = 1;
   optional Date expires_date = 2;
+  optional Date aeronautical_data_snapshot_date = 9;
   optional int32 cycle_number = 3;
   optional string part_number = 4;
   optional string copyright_line1 = 5;
   optional string copyright_line2 = 6;
+  optional string coverage_region = 7;
+
+  repeated int32 data_length = 8;
 
   // TODO: remove.
   optional bytes unknown_data_1 = 1000;  
   optional bytes unknown_data_2 = 1001;
 
-  repeated int32 data_length = 8;
 }
 
 message TableOfContents {

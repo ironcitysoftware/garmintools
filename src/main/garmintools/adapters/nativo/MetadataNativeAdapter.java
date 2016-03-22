@@ -18,6 +18,8 @@ package garmintools.adapters.nativo;
 
 import static garmintools.encoding.SixBitAsciiEncoding.SIMPLE_ENCODING;
 import garmintools.Proto;
+import garmintools.encoding.LittleEndianByteArrayDataOutput;
+import garmintools.encoding.SixBitAsciiEncoding;
 import garmintools.sections.DataLengthSection;
 import garmintools.sections.Ids;
 import garmintools.util.StringUtil;
@@ -25,6 +27,7 @@ import garmintools.wrappers.TableOfContentsEntry;
 
 import java.nio.ByteBuffer;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -41,6 +44,10 @@ public class MetadataNativeAdapter implements NativeAdapter<Proto.Metadata> {
       .build();
   private static final int DEFAULT_PREAMBLE_LENGTH = 128;
   private static final int PART_NUMBER_LENGTH = 16;
+  private static final int COVERAGE_REGION_LENGTH = 30;
+  private static final int COVERAGE_REGION_PAD_LENGTH = 25;
+  private static final int COPYRIGHT_LINE_LENGTH = 25;
+  private static final int TRAILING_ZERO_BYTE_LENGTH = 272;
 
   @Override
   public Proto.Metadata read(DataLengthSection dataLengthSection, TableOfContentsEntry entry, ByteBuffer byteBuffer) {
@@ -48,25 +55,43 @@ public class MetadataNativeAdapter implements NativeAdapter<Proto.Metadata> {
     int preambleLength = byteBuffer.get() & 0xff;
     byteBuffer.position(preambleLength + 1);
 
-    byte unknown[] = new byte[18];
+    builder.setCycleNumber(byteBuffer.getShort());
+    builder.setEffectiveDate(readDate(byteBuffer));
+    builder.setExpiresDate(readDate(byteBuffer));
+    builder.setAeronauticalDataSnapshotDate(readDate(byteBuffer));
+
+    byte unknown[] = new byte[4];
     byteBuffer.get(unknown);
     builder.setUnknownData1(ByteString.copyFrom(unknown));
 
-    byte partNumberBytes[] = new byte[12];
+    byte partNumberBytes[] = new byte[SixBitAsciiEncoding.getEncodedSize(PART_NUMBER_LENGTH)];
     byteBuffer.get(partNumberBytes);
     builder.setPartNumber(SIMPLE_ENCODING.decode(partNumberBytes).trim());
 
-    unknown = new byte[353];
+    byte coverageRegionBytes[] = new byte[COVERAGE_REGION_LENGTH];
+    byteBuffer.get(coverageRegionBytes);
+    builder.setCoverageRegion(new String(coverageRegionBytes, Charsets.US_ASCII).trim());
+
+    byte copyrightLineBytes[] = new byte[COPYRIGHT_LINE_LENGTH];
+    byteBuffer.get(copyrightLineBytes);
+    builder.setCopyrightLine1(new String(copyrightLineBytes, Charsets.US_ASCII).trim());
+    byteBuffer.get(copyrightLineBytes);
+    builder.setCopyrightLine2(new String(copyrightLineBytes, Charsets.US_ASCII).trim());
+
+    unknown = new byte[1];
     byteBuffer.get(unknown);
     builder.setUnknownData2(ByteString.copyFrom(unknown));
 
-    Preconditions.checkState(!byteBuffer.hasRemaining());
+    while(byteBuffer.hasRemaining()) {
+      Preconditions.checkState(byteBuffer.get() == 0);
+    }
+
     return builder.build();
   }
 
   @Override
   public NativeOutput write(Proto.Metadata data) {
-    ByteArrayDataOutput output = ByteStreams.newDataOutput();
+    ByteArrayDataOutput output = new LittleEndianByteArrayDataOutput(ByteStreams.newDataOutput());
     writePreamble(output);
     writeMetadata(data, output);
     return new NativeOutput(output.toByteArray());
@@ -80,8 +105,43 @@ public class MetadataNativeAdapter implements NativeAdapter<Proto.Metadata> {
   }
 
   private void writeMetadata(Proto.Metadata data, ByteArrayDataOutput output) {
+    output.writeShort(data.getCycleNumber());
+    writeDate(output, data.getEffectiveDate());
+    writeDate(output, data.getExpiresDate());
+    writeDate(output, data.getAeronauticalDataSnapshotDate());
     output.write(data.getUnknownData1().toByteArray());
     output.write(SIMPLE_ENCODING.encode(StringUtil.pad(data.getPartNumber(), PART_NUMBER_LENGTH)));
+    writeStringAndPadWithSpace(output,
+        StringUtil.pad(data.getCoverageRegion(), COVERAGE_REGION_PAD_LENGTH), COVERAGE_REGION_LENGTH);
+    writeStringAndPadWithSpace(output, data.getCopyrightLine1(), COPYRIGHT_LINE_LENGTH);
+    writeStringAndPadWithSpace(output, data.getCopyrightLine2(), COPYRIGHT_LINE_LENGTH);
     output.write(data.getUnknownData2().toByteArray());
+    for (int i = 0; i < TRAILING_ZERO_BYTE_LENGTH; ++i) {
+      output.write(0);
+    }
+  }
+
+  private void writeStringAndPadWithSpace(ByteArrayDataOutput output, String string, int paddedLength) {
+    byte b[] = string.getBytes(Charsets.US_ASCII);
+    output.write(b);
+    output.write(0);
+    Preconditions.checkArgument(b.length + 1 <= paddedLength);
+    for (int i = b.length + 1; i < paddedLength; ++i) {
+      output.write(32);
+    }
+  }
+
+  private void writeDate(ByteArrayDataOutput output, Proto.Date date) {
+    output.write(date.getMonth());
+    output.write(date.getDay());
+    output.writeShort(date.getYear());
+  }
+
+  private Proto.Date readDate(ByteBuffer byteBuffer) {
+    return Proto.Date.newBuilder()
+        .setMonth(byteBuffer.get())
+        .setDay(byteBuffer.get())
+        .setYear(byteBuffer.getShort())
+        .build();
   }
 }
