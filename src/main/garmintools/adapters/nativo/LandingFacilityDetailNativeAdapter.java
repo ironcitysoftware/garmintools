@@ -87,13 +87,20 @@ public class LandingFacilityDetailNativeAdapter implements NativeAdapter<List<La
       byteBuffer.position(byteBuffer.position() + sectionLength);
       switch (i) {
         // TODO: return list of built objects instead of passing builders?
-        case 0: readRunwayInfo(dataLengthSection, sectionByteBuffer, builder); break;
+        case 0:
+          readRunwayInfo(dataLengthSection, sectionByteBuffer, builder); break;
         case 1:
-          // 750 data has empty communication stanzas.
           if (sectionLength > 0) {
             readCommunicationInfo(dataLengthSection, sectionByteBuffer, builder);
-            break;
-          } // fall through
+          } else {
+            // 750 data has empty communication stanzas.
+            // TODO: right now piggyback on unknown section but eventually have a canonical
+            // way to express "empty" in the proto.
+            protoBuilder.addUnknownSectionBuilder().setSectionNumber(i).setData(ByteString.EMPTY);
+          }
+          break;
+        case 5:
+          // readApproachInfo(dataLengthSection, sectionByteBuffer, builder); break;
         default:
           protoBuilder.addUnknownSectionBuilder()
               .setSectionNumber(i)
@@ -245,6 +252,14 @@ public class LandingFacilityDetailNativeAdapter implements NativeAdapter<List<La
       freqBuilder.withCommunicationFrequency(protoBuilder.build());
       builder.withCommunicationFrequency(freqBuilder.build());
     }
+  }
+
+  private void readApproachInfo(DataLengthSection dataLengthSection, ByteBuffer byteBuffer, LandingFacilityDetail.Builder builder) {
+    // appears ordered by the 'best' approach ?
+    int data = byteBuffer.get();
+    // c0
+    // 3e section 65 index (approach type)
+    // 01
   }
 
   @Override

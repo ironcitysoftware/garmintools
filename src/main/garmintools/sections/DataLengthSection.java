@@ -31,7 +31,7 @@ public class DataLengthSection extends Section<List<Integer>> {
   }
 
   public enum DataLength {
-    UNKNOWN_0,
+    UNKNOWN_0,  // size of lengths in details record (2)
     UNKNOWN_1,
     UNKNOWN_2,
     RUNWAY_ADDITIONAL_INFO_2,

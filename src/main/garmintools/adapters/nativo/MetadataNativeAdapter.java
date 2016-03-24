@@ -31,7 +31,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.google.protobuf.ByteString;
 
 public class MetadataNativeAdapter implements NativeAdapter<Proto.Metadata> {
   /** Metadata does not have a TOC entry, so use a pseudo one for consistency. */
@@ -60,9 +59,9 @@ public class MetadataNativeAdapter implements NativeAdapter<Proto.Metadata> {
     builder.setExpiresDate(readDate(byteBuffer));
     builder.setAeronauticalDataSnapshotDate(readDate(byteBuffer));
 
-    byte unknown[] = new byte[4];
-    byteBuffer.get(unknown);
-    builder.setUnknownData1(ByteString.copyFrom(unknown));
+    builder.setUnknownData1(byteBuffer.get());
+    builder.setUnknownData2(byteBuffer.getShort());
+    builder.setUnknownData3(byteBuffer.get());
 
     byte partNumberBytes[] = new byte[SixBitAsciiEncoding.getEncodedSize(PART_NUMBER_LENGTH)];
     byteBuffer.get(partNumberBytes);
@@ -78,9 +77,7 @@ public class MetadataNativeAdapter implements NativeAdapter<Proto.Metadata> {
     byteBuffer.get(copyrightLineBytes);
     builder.setCopyrightLine2(new String(copyrightLineBytes, Charsets.US_ASCII).trim());
 
-    unknown = new byte[1];
-    byteBuffer.get(unknown);
-    builder.setUnknownData2(ByteString.copyFrom(unknown));
+    builder.setUnknownData4(byteBuffer.get());
 
     while(byteBuffer.hasRemaining()) {
       Preconditions.checkState(byteBuffer.get() == 0);
@@ -109,13 +106,15 @@ public class MetadataNativeAdapter implements NativeAdapter<Proto.Metadata> {
     writeDate(output, data.getEffectiveDate());
     writeDate(output, data.getExpiresDate());
     writeDate(output, data.getAeronauticalDataSnapshotDate());
-    output.write(data.getUnknownData1().toByteArray());
+    output.write(data.getUnknownData1());
+    output.writeShort(data.getUnknownData2());
+    output.write(data.getUnknownData3());
     output.write(SIMPLE_ENCODING.encode(StringUtil.pad(data.getPartNumber(), PART_NUMBER_LENGTH)));
     writeStringAndPadWithSpace(output,
         StringUtil.pad(data.getCoverageRegion(), COVERAGE_REGION_PAD_LENGTH), COVERAGE_REGION_LENGTH);
     writeStringAndPadWithSpace(output, data.getCopyrightLine1(), COPYRIGHT_LINE_LENGTH);
     writeStringAndPadWithSpace(output, data.getCopyrightLine2(), COPYRIGHT_LINE_LENGTH);
-    output.write(data.getUnknownData2().toByteArray());
+    output.write(data.getUnknownData4());
     for (int i = 0; i < TRAILING_ZERO_BYTE_LENGTH; ++i) {
       output.write(0);
     }
