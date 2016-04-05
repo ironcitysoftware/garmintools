@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import static garmintools.encoding.SixBitAsciiEncoding.SIMPLE_ENCODING;
 import garmintools.Proto;
@@ -32,7 +32,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-public class MetadataNativeAdapter implements NativeAdapter<Proto.Metadata> {
+public class MetadataGarminAdapter implements GarminAdapter<Proto.Metadata> {
   /** Metadata does not have a TOC entry, so use a pseudo one for consistency. */
   public static final TableOfContentsEntry METADATA_TOC_ENTRY = TableOfContentsEntry.newBuilder()
       .setSectionNumber(Ids.METADATA_SECTION)
@@ -87,11 +87,11 @@ public class MetadataNativeAdapter implements NativeAdapter<Proto.Metadata> {
   }
 
   @Override
-  public NativeOutput write(Proto.Metadata data) {
+  public GarminOutput write(Proto.Metadata data) {
     ByteArrayDataOutput output = new LittleEndianByteArrayDataOutput(ByteStreams.newDataOutput());
     writePreamble(output);
     writeMetadata(data, output);
-    return new NativeOutput(output.toByteArray());
+    return new GarminOutput(output.toByteArray());
   }
 
   private void writePreamble(ByteArrayDataOutput output) {

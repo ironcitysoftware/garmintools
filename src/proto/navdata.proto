@@ -37,7 +37,7 @@ message NavigationData {
   // used in LandingFacilities.
   repeated StringConstantSection string_constant_section = 6;
 
-  // Truly optional.  Temporary message so a native file can be round-tripped
+  // Truly optional.  Temporary message so a Garmin file can be round-tripped
   // through a proto, despite not all sections being understood.
   // TODO: remove.
   repeated UnparsedSection unparsed_section = 1000;
@@ -63,8 +63,8 @@ message Metadata {
 message TableOfContents {
   optional int32 num_sections = 1;
 
-  // Truly optional.  Several entries in the native table of contents appear to
-  // be lies.  Preserve the lies so the native file can be round-tripped through
+  // Truly optional.  Several entries in the Garmin table of contents appear to
+  // be lies.  Preserve the lies so the Garmin file can be round-tripped through
   // a proto.
   repeated TableOfContentsOverride table_of_contents_override = 2;
 

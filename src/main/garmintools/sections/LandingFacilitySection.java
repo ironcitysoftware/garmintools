@@ -17,9 +17,9 @@
 package garmintools.sections;
 
 import garmintools.Proto;
-import garmintools.adapters.nativo.LandingFacilityNativeAdapter;
-import garmintools.adapters.nativo.NativeAdapter;
-import garmintools.adapters.nativo.NativeOutput;
+import garmintools.adapters.garmin.LandingFacilityGarminAdapter;
+import garmintools.adapters.garmin.GarminAdapter;
+import garmintools.adapters.garmin.GarminOutput;
 import garmintools.adapters.proto.LandingFacilityProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.normalize.LandingFacilityNormalizer;
@@ -30,15 +30,15 @@ import java.util.List;
 
 public class LandingFacilitySection extends Section<List<LandingFacility>> {
   LandingFacilitySection(int sectionNumber, List<LandingFacility> data,
-      NativeAdapter<List<LandingFacility>> nativeAdapter,
+      GarminAdapter<List<LandingFacility>> garminAdapter,
       ProtoAdapter<List<LandingFacility>> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, protoAdapter);
   }
 
   LandingFacilitySection(int sectionNumber,
-      NativeAdapter<List<LandingFacility>> nativeAdapter,
+      GarminAdapter<List<LandingFacility>> garminAdapter,
       ProtoAdapter<List<LandingFacility>> protoAdapter) {
-    super(sectionNumber, new ArrayList<LandingFacility>(), nativeAdapter, protoAdapter);
+    super(sectionNumber, new ArrayList<LandingFacility>(), garminAdapter, protoAdapter);
   }
 
   @Override
@@ -62,7 +62,7 @@ public class LandingFacilitySection extends Section<List<LandingFacility>> {
   }
 
   @Override
-  public NativeOutput getNativeBytes(SectionManager sectionManager) {
+  public GarminOutput getSectionBytes(SectionManager sectionManager) {
     // We need to change the details index from an index FK to a offset FK.
     // We also need to change the name and location index from an index FK to a var len FK.
     // This is why string and details must be written first, so the FKs will be known.
@@ -76,20 +76,20 @@ public class LandingFacilitySection extends Section<List<LandingFacility>> {
           .withLocation(sectionManager.getStringSection().getKeyForIndex(landingFacility.locationIndex));
       rewrittenLandingFacility.add(builder.build());
     }
-    return nativeAdapter.write(rewrittenLandingFacility);
+    return garminAdapter.write(rewrittenLandingFacility);
   }
 
   static class Factory extends SectionFactory<List<LandingFacility>> {
     Factory() {
       super(Ids.LANDING_FACILITY_SECTION,
-          new LandingFacilityNativeAdapter(),
+          new LandingFacilityGarminAdapter(),
           new LandingFacilityProtoAdapter(),
           LandingFacilitySection.class);
     }
 
     @Override
     public LandingFacilitySection createFromProto(Proto.NavigationData proto) {
-      return new LandingFacilitySection(sectionNumber, nativeAdapter, protoAdapter);
+      return new LandingFacilitySection(sectionNumber, garminAdapter, protoAdapter);
     }
   }
 }

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import garmintools.sections.DataLengthSection;
 import garmintools.sections.Ids;
@@ -30,7 +30,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public class LookupTableNativeAdapter implements NativeAdapter<List<String>> {
+public class LookupTableGarminAdapter implements GarminAdapter<List<String>> {
   private final int sectionNumber;
 
   // TODO: find correct DataLength for these
@@ -41,7 +41,7 @@ public class LookupTableNativeAdapter implements NativeAdapter<List<String>> {
     Ids.GPS_APPROACH_TYPE_SECTION2, 7
   );
 
-  public LookupTableNativeAdapter(int sectionNumber) {
+  public LookupTableGarminAdapter(int sectionNumber) {
     this.sectionNumber = sectionNumber;
   }
 
@@ -59,20 +59,20 @@ public class LookupTableNativeAdapter implements NativeAdapter<List<String>> {
   }
 
   @Override
-  public NativeOutput write(List<String> strings) {
+  public GarminOutput write(List<String> strings) {
     int width;
     if (DEFAULT_WIDTHS.containsKey(sectionNumber)) {
       width = DEFAULT_WIDTHS.get(sectionNumber);
     } else {
       width = SizeUtil.getLongestLength(strings);
     }
-    NativeOutput nativeOutput = new NativeOutput(strings.size(), width);
+    GarminOutput output = new GarminOutput(strings.size(), width);
     for (String string : strings) {
       String paddedString = StringUtil.pad(string, width);
       for (byte b : paddedString.getBytes(Charsets.US_ASCII)) {
-        nativeOutput.put(b);
+        output.put(b);
       }
     }
-    return nativeOutput;
+    return output;
   }
 }

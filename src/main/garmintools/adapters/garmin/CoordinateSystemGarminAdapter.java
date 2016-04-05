@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import static garmintools.encoding.SixBitAsciiEncoding.SIMPLE_ENCODING;
 import garmintools.Proto;
@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 
-public class CoordinateSystemNativeAdapter implements NativeAdapter<List<Proto.CoordinateSystem>> {
+public class CoordinateSystemGarminAdapter implements GarminAdapter<List<Proto.CoordinateSystem>> {
   // TODO: find DataLength constant
   private static final int ENCODED_COORDINATE_SYSTEM_NAME_WIDTH = 15;
   private static final int NUM_PARAMETERS = 7;
@@ -64,17 +64,17 @@ public class CoordinateSystemNativeAdapter implements NativeAdapter<List<Proto.C
   }
 
   @Override
-  public NativeOutput write(List<Proto.CoordinateSystem> coordinateSystems) {
-    NativeOutput nativeOutput = new NativeOutput(
+  public GarminOutput write(List<Proto.CoordinateSystem> coordinateSystems) {
+    GarminOutput output = new GarminOutput(
         coordinateSystems.size(), ENCODED_COORDINATE_SYSTEM_NAME_WIDTH + NUM_PARAMETERS);
     for (Proto.CoordinateSystem coordinateSystem : coordinateSystems) {
-      nativeOutput.put(SIMPLE_ENCODING.encode(
+      output.put(SIMPLE_ENCODING.encode(
           StringUtil.pad(coordinateSystem.getName(),
               SixBitAsciiEncoding.getDecodedSize(ENCODED_COORDINATE_SYSTEM_NAME_WIDTH))));
       for (int parameter : coordinateSystem.getParametersList()) {
-        nativeOutput.put((byte) parameter);
+        output.put((byte) parameter);
       }
     }
-    return nativeOutput;
+    return output;
   }
 }

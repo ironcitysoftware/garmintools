@@ -18,8 +18,8 @@ package garmintools.sections;
 
 import garmintools.Proto;
 import garmintools.Proto.NavigationData;
-import garmintools.adapters.nativo.LandingFacilityIdentifierIndexNativeAdapter;
-import garmintools.adapters.nativo.NativeAdapter;
+import garmintools.adapters.garmin.LandingFacilityIdentifierIndexGarminAdapter;
+import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.keys.IndexForeignKey;
 
@@ -44,9 +44,9 @@ public class LandingFacilityIdentifierIndexSection extends Section <Map<Byte, In
   private final SortedMap<Integer, Byte> firstOffsetToByte;
 
   LandingFacilityIdentifierIndexSection(int sectionNumber, Map<Byte, Integer> data,
-      NativeAdapter<Map<Byte, Integer>> nativeAdapter,
+      GarminAdapter<Map<Byte, Integer>> garminAdapter,
       ProtoAdapter<Map<Byte, Integer>> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, protoAdapter);
     Map<Integer, Byte> inverse = HashBiMap.create(data).inverse();
     List<Integer> sortedOffsets = new ArrayList<Integer>(inverse.keySet());
     Collections.sort(sortedOffsets);
@@ -85,7 +85,7 @@ public class LandingFacilityIdentifierIndexSection extends Section <Map<Byte, In
   static class Factory extends SectionFactory<Map<Byte, Integer>> {
     Factory() {
       super(Ids.LANDING_FACILITY_IDENTIFIER_INDEX_SECTION,
-          new LandingFacilityIdentifierIndexNativeAdapter(),
+          new LandingFacilityIdentifierIndexGarminAdapter(),
           null,
           LandingFacilityIdentifierIndexSection.class);
     }
@@ -93,7 +93,7 @@ public class LandingFacilityIdentifierIndexSection extends Section <Map<Byte, In
     @Override
     public LandingFacilityIdentifierIndexSection createFromProto(NavigationData proto) {
       return new LandingFacilityIdentifierIndexSection(sectionNumber, new HashMap<Byte, Integer>(),
-          nativeAdapter, protoAdapter);
+          garminAdapter, protoAdapter);
     }
   }
 }

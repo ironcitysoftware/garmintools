@@ -14,11 +14,11 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import garmintools.Proto;
 import garmintools.keys.IndexForeignKey;
-import garmintools.keys.NativeOffsetForeignKey;
+import garmintools.keys.SectionOffsetForeignKey;
 import garmintools.keys.VariableLengthEncodingForeignKey;
 import garmintools.sections.DataLengthSection;
 import garmintools.wrappers.LandingFacility;
@@ -31,7 +31,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Ints;
 
-public class LandingFacilityNativeAdapter implements NativeAdapter<List<LandingFacility>> {
+public class LandingFacilityGarminAdapter implements GarminAdapter<List<LandingFacility>> {
   public static final int LANDING_FACILITY_ENCODED_SIZE = 28;
   private static final int ELEVATION_ADJUSTMENT = 0x1388;
   private static final int TWO_TO_TWENTY_FOUR = 1 << 24;
@@ -136,7 +136,7 @@ public class LandingFacilityNativeAdapter implements NativeAdapter<List<LandingF
     mask = byteBuffer.getInt();
     if (hasLandingFacilityDetail) {
       int landingFacilityDetailsOffset = landingFacilityDetailsOffsetHigh | ((mask >> 16) & 0xffff);
-      builder.withDetail(new NativeOffsetForeignKey(landingFacilityDetailsOffset));
+      builder.withDetail(new SectionOffsetForeignKey(landingFacilityDetailsOffset));
     } else {
       unknown[7] = (mask >> 16) & 0xffff;  // Have seen 0x614, usually is 0x600.
     }
@@ -158,19 +158,19 @@ public class LandingFacilityNativeAdapter implements NativeAdapter<List<LandingF
   }
 
   @Override
-  public NativeOutput write(List<LandingFacility> landingFacilities) {
-    NativeOutput nativeOutput = new NativeOutput(landingFacilities.size(), LANDING_FACILITY_ENCODED_SIZE);
+  public GarminOutput write(List<LandingFacility> landingFacilities) {
+    GarminOutput output = new GarminOutput(landingFacilities.size(), LANDING_FACILITY_ENCODED_SIZE);
     for (LandingFacility landingFacility : landingFacilities) {
-      encode(landingFacility, nativeOutput);
+      encode(landingFacility, output);
     }
-    return nativeOutput;
+    return output;
   }
 
-  private void encode(LandingFacility facility, NativeOutput nativeOutput) {
+  private void encode(LandingFacility facility, GarminOutput output) {
     int longitudeBits = (int) (facility.protoLandingFacility.getLongitudeDegrees() * TWO_TO_TWENTY_FOUR / 180);
     int latitudeBits = (int) (facility.protoLandingFacility.getLatitudeDegrees() * TWO_TO_TWENTY_FOUR / 180);
-    nativeOutput.putShort((short) ((longitudeBits >> 9) & 0xffff));
-    nativeOutput.putShort((short) ((latitudeBits >> 8) & 0xffff));
+    output.putShort((short) ((longitudeBits >> 9) & 0xffff));
+    output.putShort((short) ((latitudeBits >> 8) & 0xffff));
 
     int unknown[] = Ints.toArray(facility.protoLandingFacility.getUnknownList());
 
@@ -180,12 +180,12 @@ public class LandingFacilityNativeAdapter implements NativeAdapter<List<LandingF
         | ((facility.icaoRegion.getIndex() & 0x1ff) << 17)
         | ((longitudeBits & 0x1ff) << 8)
         | ((latitudeBits & 0xff));
-    nativeOutput.putInt(data);
-    nativeOutput.put(facility.identifier);
+    output.putInt(data);
+    output.put(facility.identifier);
 
     data = ((facility.detail != null ? 1 : 0) << 15)
         | ((facility.protoLandingFacility.getElevationFeet() + ELEVATION_ADJUSTMENT) & 0x7fff);
-    nativeOutput.putShort((short) data);
+    output.putShort((short) data);
 
     data = ((unknown[2] & 3) << 30)
         | ((unknown[3] & 1) << 29)
@@ -194,26 +194,26 @@ public class LandingFacilityNativeAdapter implements NativeAdapter<List<LandingF
         | ((facility.protoLandingFacility.getJetAFuelAvailable() ? 1 : 0) << 22)
         | (((7 - facility.name.getBitIndex()) & 7) << 19)
         | ((facility.name.getByteIndex() & 0x7ffff));
-    nativeOutput.putInt(data);
+    output.putInt(data);
 
-    int detailNativeOffset = facility.detail == null
+    int detailOffset = facility.detail == null
         ? (unknown[7] & 0xffff)
-        : facility.detail.getNativeOffset();
-    data = ((detailNativeOffset & 0x7f0000) << 9)
+        : facility.detail.getSectionOffset();
+    data = ((detailOffset & 0x7f0000) << 9)
         | ((unknown[5] & 1) << 24)
         | ((facility.protoLandingFacility.getRadarAvailable() ? 1 : 0) << 23)
         | ((unknown[6] & 1) << 22)
         | (((7 - facility.location.getBitIndex()) & 7) << 19)
         | ((facility.location.getByteIndex() & 0x7ffff));
-    nativeOutput.putInt(data);
+    output.putInt(data);
 
-    data = ((detailNativeOffset & 0xffff) << 16)
+    data = ((detailOffset & 0xffff) << 16)
         | ((facility.airspace.getIndex() & 7) << 13)
         | ((unknown[8] & 0x1fff));
-    nativeOutput.putInt(data);
+    output.putInt(data);
 
     data = ((unknown[9] & 0xffffff) << 8)
         | (unknown[10] & 0xff);
-    nativeOutput.putInt(data);
+    output.putInt(data);
   }
 }

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import garmintools.sections.DataLengthSection;
 import garmintools.wrappers.TableOfContents;
@@ -34,7 +34,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.LittleEndianDataInputStream;
 import com.google.common.primitives.Ints;
 
-public class TableOfContentsNativeAdapter implements NativeAdapter<TableOfContents> {
+public class TableOfContentsGarminAdapter implements GarminAdapter<TableOfContents> {
   /** TODO: handle a different number of sections, item lengths, or location of the TOC. */
   public static final int TABLE_OF_CONTENTS_OFFSET = 0x200;
   private static final int MAX_ITEM_QUANTITY = 108;
@@ -51,16 +51,16 @@ public class TableOfContentsNativeAdapter implements NativeAdapter<TableOfConten
     throw new UnsupportedOperationException("Use read(originalInputStream, inputFileLength)");
   }
 
-  public int getNativeSize(int numEntries) {
+  public int getSize(int numEntries) {
     return numEntries * ITEM_LENGTH;
   }
 
   /**
-   * Reading the native table of contents does not fit well into the NativeAdapter.read interface
+   * Reading the table of contents does not fit well into the GarminAdapter.read interface
    * for two reasons:
-   * 1) the first entry in the TOC is for the TOC itself, so the length is not known apriori.
+   * 1) the first entry in the TOC is for the TOC itself, so the length is not known a priori.
    * 2) it is useful to know the input file length to construct the TOC, and this is not available
-   *    in the traditional NativeAdapter.read interface.
+   *    in the traditional GarminAdapter.read interface.
    */
   public TableOfContents read(InputStream originalInputStream, int inputFileLength)
       throws IOException {
@@ -121,28 +121,28 @@ public class TableOfContentsNativeAdapter implements NativeAdapter<TableOfConten
    * The supplied data does not contain the TOC entry itself.
    */
   @Override
-  public NativeOutput write(TableOfContents data) {
-    NativeOutput nativeOutput = new NativeOutput(data.numSections, ITEM_LENGTH);
+  public GarminOutput write(TableOfContents data) {
+    GarminOutput output = new GarminOutput(data.numSections, ITEM_LENGTH);
     TableOfContentsEntry toc = TableOfContentsEntry.newBuilder()
         .setFileOffset(TABLE_OF_CONTENTS_OFFSET)
         .setItemLength(ITEM_LENGTH)
         .setItemQuantity(data.numSections)
         .build();
-    writeTableOfContentsEntry(toc, nativeOutput);
+    writeTableOfContentsEntry(toc, output);
 
     // The TOC TOC counts as one, so only n - 1 actual sections are present in the TOC.
     for (int sectionNumber = 0; sectionNumber < data.numSections - 1; ++sectionNumber) {
       if (data.toc.containsKey(sectionNumber)) {
-        writeTableOfContentsEntry(data.toc.get(sectionNumber), nativeOutput);
+        writeTableOfContentsEntry(data.toc.get(sectionNumber), output);
       } else {
         writeTableOfContentsEntry(
             getSectionNotPresentEntry(sectionNumber,
                 data.emptySectionItemLengths.get(sectionNumber)),
-            nativeOutput);
+            output);
       }
     }
 
-    return nativeOutput;
+    return output;
   }
 
   private TableOfContentsEntry getSectionNotPresentEntry(int sectionNumber, Integer itemLength) {
@@ -153,13 +153,13 @@ public class TableOfContentsNativeAdapter implements NativeAdapter<TableOfConten
     return builder.build();
   }
 
-  private void writeTableOfContentsEntry(TableOfContentsEntry entry, NativeOutput nativeOutput) {
+  private void writeTableOfContentsEntry(TableOfContentsEntry entry, GarminOutput output) {
     Preconditions.checkState(entry.fileOffset <= 0xffffff);
     Preconditions.checkState(entry.itemLength <= 0xffff);
     Preconditions.checkState(entry.itemQuantity <= 0xffffff);
     int data = ((entry.itemLength & 0xff00) << 16) | (entry.fileOffset & 0xffffff);
-    nativeOutput.putInt(data);
+    output.putInt(data);
     data = (entry.itemQuantity << 8) | (entry.itemLength & 0xff);
-    nativeOutput.putInt(data);
+    output.putInt(data);
   }
 }

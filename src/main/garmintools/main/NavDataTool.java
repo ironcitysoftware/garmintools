@@ -18,8 +18,8 @@ package garmintools.main;
 
 import garmintools.Proto;
 import garmintools.Proto.NavigationData;
-import garmintools.adapters.nativo.TableOfContentsNativeAdapter;
-import garmintools.files.NativeNavigationDataFile;
+import garmintools.adapters.garmin.TableOfContentsGarminAdapter;
+import garmintools.files.GarminNavigationDataFile;
 import garmintools.files.NavigationDataFileFactory;
 import garmintools.files.ProtoNavigationDataFile;
 import garmintools.sections.SectionManager;
@@ -64,15 +64,15 @@ public class NavDataTool {
     switch (args[0].toLowerCase()) {
       case "print":
         printHelpAndExitIf(args.length != 2);
-        printNativeFile(new File(args[1]));
+        printGarminFile(new File(args[1]));
         break;
       case "encode":
         printHelpAndExitIf(args.length != 3);
-        encodeNativeFile(new File(args[1]), new File(args[2]));
+        encodeGarminFile(new File(args[1]), new File(args[2]));
         break;
       case "decode":
         printHelpAndExitIf(args.length != 3);
-        decodeNativeFile(new File(args[1]), new File(args[2]));
+        decodeGarminFile(new File(args[1]), new File(args[2]));
         break;
       case "toc":
         printHelpAndExitIf(args.length != 2);
@@ -83,18 +83,18 @@ public class NavDataTool {
     }
   }
 
-  private void printNativeFile(File nativeDataFile) throws IOException {
-    InputStream inputStream = new FileInputStream(nativeDataFile);
-    NativeNavigationDataFile dataFile =
-        new NavigationDataFileFactory().createFromNative(inputStream, nativeDataFile.length());
+  private void printGarminFile(File garminDataFile) throws IOException {
+    InputStream inputStream = new FileInputStream(garminDataFile);
+    GarminNavigationDataFile dataFile =
+        new NavigationDataFileFactory().createFromGarmin(inputStream, garminDataFile.length());
     dataFile.printSections();
   }
 
-  private void printTableOfContents(File nativeDataFile) throws IOException {
-    InputStream inputStream = new FileInputStream(nativeDataFile);
-    ByteStreams.skipFully(inputStream, TableOfContentsNativeAdapter.TABLE_OF_CONTENTS_OFFSET);
-    SectionManager.NativeBuilder sectionManagerBuilder = new SectionManager.NativeBuilder();
-    sectionManagerBuilder.readTableOfContents(inputStream, Ints.checkedCast(nativeDataFile.length()));
+  private void printTableOfContents(File garminDataFile) throws IOException {
+    InputStream inputStream = new FileInputStream(garminDataFile);
+    ByteStreams.skipFully(inputStream, TableOfContentsGarminAdapter.TABLE_OF_CONTENTS_OFFSET);
+    SectionManager.GarminBuilder sectionManagerBuilder = new SectionManager.GarminBuilder();
+    sectionManagerBuilder.readTableOfContents(inputStream, Ints.checkedCast(garminDataFile.length()));
     SectionManager sectionManager = sectionManagerBuilder.build();
     TableOfContentsSection tocSection = sectionManager.getTableOfContentsSection();
     for (TableOfContentsEntry entry : tocSection.getEntryMap().values()) {
@@ -103,23 +103,23 @@ public class NavDataTool {
     inputStream.close();
   }
 
-  private void encodeNativeFile(File protoFile, File nativeDataFile) throws IOException  {
+  private void encodeGarminFile(File protoFile, File garminDataFile) throws IOException  {
     FileInputStream inputStream = new FileInputStream(protoFile);
-    FileOutputStream outputStream = new FileOutputStream(nativeDataFile);
+    FileOutputStream outputStream = new FileOutputStream(garminDataFile);
     logger.info(String.format("Reading from %s", protoFile.getAbsolutePath()));
     NavigationData proto = NavigationData.parseFrom(inputStream);
     ProtoNavigationDataFile dataFile =
         new NavigationDataFileFactory().createFromProto(proto);
-    logger.info(String.format("Writing to %s", nativeDataFile.getAbsolutePath()));
-    dataFile.writeToNative(outputStream);
+    logger.info(String.format("Writing to %s", garminDataFile.getAbsolutePath()));
+    dataFile.writeToGarmin(outputStream);
   }
 
-  private void decodeNativeFile(File nativeDataFile, File protoFile) throws IOException  {
-    FileInputStream inputStream = new FileInputStream(nativeDataFile);
+  private void decodeGarminFile(File garminDataFile, File protoFile) throws IOException  {
+    FileInputStream inputStream = new FileInputStream(garminDataFile);
     FileOutputStream outputStream = new FileOutputStream(protoFile);
-    logger.info(String.format("Reading from %s", nativeDataFile.getAbsolutePath()));
-    NativeNavigationDataFile dataFile =
-        new NavigationDataFileFactory().createFromNative(inputStream, nativeDataFile.length());
+    logger.info(String.format("Reading from %s", garminDataFile.getAbsolutePath()));
+    GarminNavigationDataFile dataFile =
+        new NavigationDataFileFactory().createFromGarmin(inputStream, garminDataFile.length());
     logger.info(String.format("Write to %s", protoFile.getAbsolutePath()));
     Proto.NavigationData.Builder protoBuilder = Proto.NavigationData.newBuilder();
     dataFile.writeToProto(protoBuilder);

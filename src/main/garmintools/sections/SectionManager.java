@@ -17,7 +17,7 @@
 package garmintools.sections;
 
 import garmintools.Proto;
-import garmintools.adapters.nativo.NativeOutput;
+import garmintools.adapters.garmin.GarminOutput;
 import garmintools.wrappers.TableOfContentsEntry;
 
 import java.io.IOException;
@@ -139,11 +139,11 @@ public class SectionManager {
     }
   }
 
-  public Map<Integer, NativeOutput> getNativeBytes() {
-    ImmutableMap.Builder<Integer, NativeOutput> sectionToBufferBuilder = ImmutableMap.builder();
+  public Map<Integer, GarminOutput> getGarminOutputs() {
+    ImmutableMap.Builder<Integer, GarminOutput> sectionToBufferBuilder = ImmutableMap.builder();
     for (int sectionNumber : DEFAULT_SECTION_ORDER) {
       if (sectionNumber <= Ids.MAX_SECTION_NUMBER) {
-        sectionToBufferBuilder.put(sectionNumber, sections.get(sectionNumber).getNativeBytes(this));
+        sectionToBufferBuilder.put(sectionNumber, sections.get(sectionNumber).getSectionBytes(this));
       }
     }
     return sectionToBufferBuilder.build();
@@ -198,19 +198,19 @@ public class SectionManager {
     return builder.build();
   }
 
-  public static class NativeBuilder {
+  public static class GarminBuilder {
     private List<Section<?>> sections = new ArrayList<>();
 
-    public NativeBuilder readTableOfContents(InputStream inputStream, int inputFileLength) throws IOException {
+    public GarminBuilder readTableOfContents(InputStream inputStream, int inputFileLength) throws IOException {
       TableOfContentsSection.Factory factory = (TableOfContentsSection.Factory)
           SECTION_FACTORIES.get(Ids.TABLE_OF_CONTENTS_SECTION);
-      sections.add(factory.createFromNative(inputStream, inputFileLength));
+      sections.add(factory.createFromGarmin(inputStream, inputFileLength));
       return this;
     }
 
-    public NativeBuilder addSection(TableOfContentsEntry entry, ByteBuffer byteBuffer) {
+    public GarminBuilder addSection(TableOfContentsEntry entry, ByteBuffer byteBuffer) {
       Section<?> section = SECTION_FACTORIES.get(entry.sectionNumber)
-          .createFromNative((DataLengthSection) getSection(Ids.DATA_LENGTH_SECTION), entry, byteBuffer);
+          .createFromGarmin((DataLengthSection) getSection(Ids.DATA_LENGTH_SECTION), entry, byteBuffer);
       sections.add(section);
       return this;
     }

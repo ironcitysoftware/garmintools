@@ -16,8 +16,8 @@
 
 package garmintools.sections;
 
-import garmintools.adapters.nativo.NativeAdapter;
-import garmintools.adapters.nativo.TableOfContentsNativeAdapter;
+import garmintools.adapters.garmin.GarminAdapter;
+import garmintools.adapters.garmin.TableOfContentsGarminAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.adapters.proto.TableOfContentsProtoAdapter;
 import garmintools.wrappers.TableOfContents;
@@ -32,24 +32,24 @@ import java.util.Map;
 import com.google.common.base.Joiner;
 
 /**
- * The table of contents of a native NavData file maps well-known sections to subsets of the file.
+ * The table of contents of a Garmin NavData file maps well-known sections to subsets of the file.
  * For some sections, the declared length doesn't match the actual length.
  * We retain the correct lengths in order to read each section's portion of the InputStream fully.
  * If we move to a random-access model this would not be necessary.
  */
 public class TableOfContentsSection extends Section<TableOfContents> {
   TableOfContentsSection(int sectionNumber, TableOfContents data,
-      NativeAdapter<TableOfContents> nativeAdapter,
+      GarminAdapter<TableOfContents> garminAdapter,
       ProtoAdapter<TableOfContents> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, protoAdapter);
   }
 
   public Map<Integer, TableOfContentsEntry> getEntryMap() {
     return data.toc;
   }
 
-  public int getNativeSize() {
-    return ((TableOfContentsNativeAdapter) nativeAdapter).getNativeSize(data.numSections);
+  public int getSize() {
+    return ((TableOfContentsGarminAdapter) garminAdapter).getSize(data.numSections);
   }
 
   public void insert(int sectionNumber, int itemLength, int itemQuantity, int fileOffset) {
@@ -80,15 +80,15 @@ public class TableOfContentsSection extends Section<TableOfContents> {
   static class Factory extends SectionFactory<TableOfContents> {
     Factory() {
       super(Ids.TABLE_OF_CONTENTS_SECTION,
-          new TableOfContentsNativeAdapter(),
+          new TableOfContentsGarminAdapter(),
           new TableOfContentsProtoAdapter(),
           TableOfContentsSection.class);
     }
 
-    public TableOfContentsSection createFromNative(InputStream inputStream, int inputFileLength)
+    public TableOfContentsSection createFromGarmin(InputStream inputStream, int inputFileLength)
         throws IOException {
-      TableOfContents data = ((TableOfContentsNativeAdapter) nativeAdapter).read(inputStream, inputFileLength);
-      return new TableOfContentsSection(sectionNumber, data, nativeAdapter, protoAdapter);
+      TableOfContents data = ((TableOfContentsGarminAdapter) garminAdapter).read(inputStream, inputFileLength);
+      return new TableOfContentsSection(sectionNumber, data, garminAdapter, protoAdapter);
     }
   }
 }

@@ -16,8 +16,8 @@
 
 package garmintools.sections;
 
-import garmintools.adapters.nativo.LookupTableNativeAdapter;
-import garmintools.adapters.nativo.NativeAdapter;
+import garmintools.adapters.garmin.LookupTableGarminAdapter;
+import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.proto.LookupTableProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.keys.IndexForeignKey;
@@ -26,9 +26,9 @@ import java.util.List;
 
 public class LookupTableSection extends Section<List<String>> {
   LookupTableSection(int sectionNumber, List<String> data,
-      NativeAdapter<List<String>> nativeAdapter,
+      GarminAdapter<List<String>> garminAdapter,
       ProtoAdapter<List<String>> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, protoAdapter);
   }
 
   public IndexForeignKey lookupOrInsert(String string) {
@@ -45,7 +45,7 @@ public class LookupTableSection extends Section<List<String>> {
   static class Factory extends SectionFactory<List<String>> {
     Factory(int sectionNumber) {
       super(sectionNumber,
-          new LookupTableNativeAdapter(sectionNumber),
+          new LookupTableGarminAdapter(sectionNumber),
           new LookupTableProtoAdapter(sectionNumber),
           LookupTableSection.class);
     }

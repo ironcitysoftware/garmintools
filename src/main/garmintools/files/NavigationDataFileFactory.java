@@ -17,7 +17,7 @@
 package garmintools.files;
 
 import garmintools.Proto.NavigationData;
-import garmintools.adapters.nativo.MetadataNativeAdapter;
+import garmintools.adapters.garmin.MetadataGarminAdapter;
 import garmintools.sections.Ids;
 import garmintools.sections.SectionManager;
 import garmintools.sections.TableOfContentsSection;
@@ -38,11 +38,11 @@ import com.google.common.primitives.Ints;
 public class NavigationDataFileFactory {
   private final Logger logger = Logger.getLogger(getClass().getName());
 
-  public NativeNavigationDataFile createFromNative(InputStream inputStream, long inputFileLength)
+  public GarminNavigationDataFile createFromGarmin(InputStream inputStream, long inputFileLength)
       throws IOException {
     CountingInputStream countingInputStream = new CountingInputStream(inputStream);
-    SectionManager.NativeBuilder sectionManagerBuilder = new SectionManager.NativeBuilder();
-    readSection(MetadataNativeAdapter.METADATA_TOC_ENTRY, countingInputStream, sectionManagerBuilder);
+    SectionManager.GarminBuilder sectionManagerBuilder = new SectionManager.GarminBuilder();
+    readSection(MetadataGarminAdapter.METADATA_TOC_ENTRY, countingInputStream, sectionManagerBuilder);
     sectionManagerBuilder.readTableOfContents(countingInputStream, Ints.checkedCast(inputFileLength));
     Collection<TableOfContentsEntry> tocEntries =
         ((TableOfContentsSection) sectionManagerBuilder.getSection(Ids.TABLE_OF_CONTENTS_SECTION))
@@ -50,11 +50,11 @@ public class NavigationDataFileFactory {
     for (TableOfContentsEntry entry : tocEntries) {
       readSection(entry, countingInputStream, sectionManagerBuilder);
     }
-    return new NativeNavigationDataFile(sectionManagerBuilder.build());
+    return new GarminNavigationDataFile(sectionManagerBuilder.build());
   }
 
   private void readSection(TableOfContentsEntry entry, CountingInputStream countingInputStream,
-      SectionManager.NativeBuilder sectionManagerBuilder) throws IOException {
+      SectionManager.GarminBuilder sectionManagerBuilder) throws IOException {
     Preconditions.checkState(countingInputStream.getCount() == entry.fileOffset);
     InputStream sectionInputStream = ByteStreams.limit(countingInputStream, entry.actualLength);
     ByteBuffer byteBuffer = ByteBuffer.wrap(ByteStreams.toByteArray(sectionInputStream))

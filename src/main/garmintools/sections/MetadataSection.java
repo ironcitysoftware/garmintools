@@ -17,22 +17,22 @@
 package garmintools.sections;
 
 import garmintools.Proto;
-import garmintools.adapters.nativo.MetadataNativeAdapter;
-import garmintools.adapters.nativo.NativeAdapter;
+import garmintools.adapters.garmin.MetadataGarminAdapter;
+import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.proto.MetadataProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 
 public class MetadataSection extends Section<Proto.Metadata> {
   MetadataSection(int sectionNumber, Proto.Metadata data,
-      NativeAdapter<Proto.Metadata> nativeAdapter,
+      GarminAdapter<Proto.Metadata> garminAdapter,
       ProtoAdapter<Proto.Metadata> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, protoAdapter);
   }
 
   static class Factory extends SectionFactory<Proto.Metadata> {
     Factory() {
       super(Ids.METADATA_SECTION,
-          new MetadataNativeAdapter(),
+          new MetadataGarminAdapter(),
           new MetadataProtoAdapter(),
           MetadataSection.class);
     }

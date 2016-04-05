@@ -16,10 +16,10 @@
 
 package garmintools.sections;
 
-import garmintools.adapters.nativo.NativeAdapter;
-import garmintools.adapters.nativo.NativeOutput;
-import garmintools.adapters.nativo.StringNativeAdapter;
-import garmintools.adapters.nativo.StringNativeAdapter.NativeOutputAndKeys;
+import garmintools.adapters.garmin.GarminAdapter;
+import garmintools.adapters.garmin.GarminOutput;
+import garmintools.adapters.garmin.StringGarminAdapter;
+import garmintools.adapters.garmin.StringGarminAdapter.GarminOutputAndKeys;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.adapters.proto.StringProtoAdapter;
 import garmintools.keys.IndexForeignKey;
@@ -45,14 +45,17 @@ public class StringSection extends Section<List<String>> {
 
   // read from proto
   public StringSection(int sectionNumber, List<String> data,
-      NativeAdapter<List<String>> nativeAdapter,
+      GarminAdapter<List<String>> garminAdapter,
       ProtoAdapter<List<String>> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, protoAdapter);
   }
 
-  // read from native
-  public StringSection(int sectionNumber, List<String> data, List<VariableLengthEncodingForeignKey> keys, NativeAdapter<List<String>> nativeAdapter, ProtoAdapter<List<String>> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+  // read from garmin
+  public StringSection(int sectionNumber, List<String> data,
+      List<VariableLengthEncodingForeignKey> keys,
+      GarminAdapter<List<String>> garminAdapter,
+      ProtoAdapter<List<String>> protoAdapter) {
+    super(sectionNumber, data, garminAdapter, protoAdapter);
     readKeys = keys;
   }
 
@@ -82,32 +85,32 @@ public class StringSection extends Section<List<String>> {
   }
 
   @Override
-  public NativeOutput getNativeBytes(SectionManager sectionManager) {
+  public GarminOutput getSectionBytes(SectionManager sectionManager) {
     List<String> sortedData = new ArrayList<>(data);
-    Collections.sort(sortedData);  // Not sure if this is required, but native strings are sorted.
-    NativeOutputAndKeys nativeOutput = (NativeOutputAndKeys) nativeAdapter.write(sortedData);
+    Collections.sort(sortedData);  // Not sure if this is required, but Garmin strings are sorted.
+    GarminOutputAndKeys output = (GarminOutputAndKeys) garminAdapter.write(sortedData);
 
     ImmutableMap.Builder<Integer, VariableLengthEncodingForeignKey> mapBuilder = ImmutableMap.builder();
-    for (int index = 0; index < nativeOutput.keys.size(); index++) {
+    for (int index = 0; index < output.keys.size(); index++) {
       String string = data.get(index);
       int sortedIndex = sortedData.indexOf(string);
-      mapBuilder.put(sortedIndex, nativeOutput.keys.get(index));
+      mapBuilder.put(sortedIndex, output.keys.get(index));
     }
     indexToWrittenKey = mapBuilder.build();
-    return nativeOutput;
+    return output;
   }
 
   static class Factory extends SectionFactory<List<String>> {
     Factory() {
       super(Ids.STRING_SECTION,
-          new StringNativeAdapter(),
+          new StringGarminAdapter(),
           new StringProtoAdapter(),
           StringSection.class);
     }
 
     @Override
-    public Section<List<String>> createFromNative(DataLengthSection dataLengthSection, TableOfContentsEntry entry, ByteBuffer byteBuffer) {
-      List<StringAndKey> stringAndKey = ((StringNativeAdapter) nativeAdapter).readWithKeys(dataLengthSection, entry, byteBuffer);
+    public Section<List<String>> createFromGarmin(DataLengthSection dataLengthSection, TableOfContentsEntry entry, ByteBuffer byteBuffer) {
+      List<StringAndKey> stringAndKey = ((StringGarminAdapter) garminAdapter).readWithKeys(dataLengthSection, entry, byteBuffer);
       ImmutableList.Builder<String> strings = ImmutableList.builder();
       ImmutableList.Builder<VariableLengthEncodingForeignKey> keys = ImmutableList.builder();
       for (int index = 0; index < stringAndKey.size(); ++index) {
@@ -118,7 +121,7 @@ public class StringSection extends Section<List<String>> {
           sectionNumber,
           strings.build(),
           keys.build(),
-          nativeAdapter,
+          garminAdapter,
           protoAdapter);
     }
   }

@@ -14,31 +14,31 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.WritableByteChannel;
 
-public class NativeOutput {
+public class GarminOutput {
   private final int itemQuantity;
   private final int itemLength;
   private final ByteBuffer byteBuffer;
 
-  public NativeOutput(int itemQuantity, int itemLength) {
+  public GarminOutput(int itemQuantity, int itemLength) {
     this.itemQuantity = itemQuantity;
     this.itemLength = itemLength;
     this.byteBuffer = ByteBuffer.allocate(itemQuantity * itemLength).order(ByteOrder.LITTLE_ENDIAN);
   }
 
-  public NativeOutput(int itemQuantity, int itemLength, int actualSize) {
+  public GarminOutput(int itemQuantity, int itemLength, int actualSize) {
     this.itemQuantity = itemQuantity;
     this.itemLength = itemLength;
     this.byteBuffer = ByteBuffer.allocate(actualSize).order(ByteOrder.LITTLE_ENDIAN);
   }
 
-  public NativeOutput(byte data[]) {
+  public GarminOutput(byte data[]) {
     this.itemQuantity = data.length;
     this.itemLength = 1;
     this.byteBuffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);

@@ -24,13 +24,13 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 public class LandingFacilityDetail {
-  public final int nativeFileOffset;
+  public final int sectionOffset;
   public final Proto.LandingFacilityDetail protoLandingFacilityDetail;
   public final List<Runway> runways;
   public final List<CommunicationFrequency> communicationFrequencies;
 
   private LandingFacilityDetail(Builder builder) {
-    this.nativeFileOffset = builder.nativeFileOffset;
+    this.sectionOffset = builder.sectionOffset;
     this.protoLandingFacilityDetail = builder.protoLandingFacilityDetail;
     this.runways = ImmutableList.copyOf(builder.runways);
     this.communicationFrequencies = ImmutableList.copyOf(builder.communicationFrequencies);
@@ -41,13 +41,13 @@ public class LandingFacilityDetail {
   }
 
   public static class Builder {
-    private int nativeFileOffset;
+    private int sectionOffset;
     private Proto.LandingFacilityDetail protoLandingFacilityDetail;
     private List<Runway> runways = new ArrayList<>();
     private List<CommunicationFrequency> communicationFrequencies = new ArrayList<>();
 
     private Builder() { }
-    public Builder withNativeFileOffset(int offset) { this.nativeFileOffset = offset; return this; }
+    public Builder withSectionOffset(int offset) { this.sectionOffset = offset; return this; }
     public Builder withLandingFacilityDetail(Proto.LandingFacilityDetail proto) {
       this.protoLandingFacilityDetail = proto; return this; }
     public Builder withRunway(Runway runway) { runways.add(runway); return this; }

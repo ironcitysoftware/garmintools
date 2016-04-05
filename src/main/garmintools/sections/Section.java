@@ -17,20 +17,20 @@
 package garmintools.sections;
 
 import garmintools.Proto;
-import garmintools.adapters.nativo.NativeAdapter;
-import garmintools.adapters.nativo.NativeOutput;
+import garmintools.adapters.garmin.GarminAdapter;
+import garmintools.adapters.garmin.GarminOutput;
 import garmintools.adapters.proto.ProtoAdapter;
 
 abstract class Section<T> {
   final int sectionNumber;
-  final NativeAdapter<T> nativeAdapter;
+  final GarminAdapter<T> garminAdapter;
   final ProtoAdapter<T> protoAdapter;
   final T data;
 
-  Section(int sectionNumber, T data, NativeAdapter<T> nativeAdapter, ProtoAdapter<T> protoAdapter) {
+  Section(int sectionNumber, T data, GarminAdapter<T> garminAdapter, ProtoAdapter<T> protoAdapter) {
     this.sectionNumber = sectionNumber;
     this.data = data;
-    this.nativeAdapter = nativeAdapter;
+    this.garminAdapter = garminAdapter;
     this.protoAdapter = protoAdapter;
   }
 
@@ -43,8 +43,8 @@ abstract class Section<T> {
     protoAdapter.write(data, builder);
   }
 
-  public NativeOutput getNativeBytes(SectionManager sectionManager) {
-    return nativeAdapter.write(data);
+  public GarminOutput getSectionBytes(SectionManager sectionManager) {
+    return garminAdapter.write(data);
   }
 
   @Override

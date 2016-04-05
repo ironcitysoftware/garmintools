@@ -16,7 +16,7 @@
 
 package garmintools.files;
 
-import garmintools.adapters.nativo.NativeOutput;
+import garmintools.adapters.garmin.GarminOutput;
 import garmintools.sections.SectionManager;
 import garmintools.sections.TableOfContentsSection;
 
@@ -35,27 +35,27 @@ public class ProtoNavigationDataFile {
     this.sectionManager = sectionManager;
   }
 
-  public void writeToNative(FileOutputStream outputStream) throws IOException {
+  public void writeToGarmin(FileOutputStream outputStream) throws IOException {
     WritableByteChannel channel = Channels.newChannel(outputStream);
-    Map<Integer, NativeOutput> sectionToOutput = sectionManager.getNativeBytes();
-    List<NativeOutput> outputs = new ArrayList<>();
+    Map<Integer, GarminOutput> sectionToOutput = sectionManager.getGarminOutputs();
+    List<GarminOutput> outputs = new ArrayList<>();
 
-    NativeOutput metadata = sectionManager.getMetadataSection().getNativeBytes(sectionManager);
+    GarminOutput metadata = sectionManager.getMetadataSection().getSectionBytes(sectionManager);
     outputs.add(metadata);
 
     TableOfContentsSection tocSection = sectionManager.getTableOfContentsSection();
     // We need to know the size of the TOC section to insert the proper offsets into the TOC.
-    int fileOffset = metadata.size() + tocSection.getNativeSize();
-    for (Map.Entry<Integer, NativeOutput> entry : sectionToOutput.entrySet()) {
-      NativeOutput nativeOutput = entry.getValue();
+    int fileOffset = metadata.size() + tocSection.getSize();
+    for (Map.Entry<Integer, GarminOutput> entry : sectionToOutput.entrySet()) {
+      GarminOutput output = entry.getValue();
       tocSection.insert(
-          entry.getKey(), nativeOutput.getItemLength(), nativeOutput.getItemQuantity(), fileOffset);
-      fileOffset += nativeOutput.size();
+          entry.getKey(), output.getItemLength(), output.getItemQuantity(), fileOffset);
+      fileOffset += output.size();
     }
-    outputs.add(sectionManager.getTableOfContentsSection().getNativeBytes(sectionManager));
+    outputs.add(sectionManager.getTableOfContentsSection().getSectionBytes(sectionManager));
     outputs.addAll(sectionToOutput.values());
 
-    for (NativeOutput output : outputs) {
+    for (GarminOutput output : outputs) {
       output.write(channel);
     }
   }

@@ -14,23 +14,14 @@
  *  limitations under the License.
  */
 
-package garmintools.files;
+package garmintools.adapters.garmin;
 
-import garmintools.Proto;
-import garmintools.sections.SectionManager;
+import garmintools.sections.DataLengthSection;
+import garmintools.wrappers.TableOfContentsEntry;
 
-public class NativeNavigationDataFile {
-  private final SectionManager sectionManager;
+import java.nio.ByteBuffer;
 
-  NativeNavigationDataFile(SectionManager sectionManager) {
-    this.sectionManager = sectionManager;
-  }
-
-  public void writeToProto(Proto.NavigationData.Builder protoBuilder) {
-    sectionManager.mergeToProto(protoBuilder);
-  }
-
-  public void printSections() {
-    System.out.println(sectionManager);
-  }
+public interface GarminAdapter<T> {
+  public T read(DataLengthSection dataLengthSection, TableOfContentsEntry entry, ByteBuffer byteBuffer);
+  public GarminOutput write(T data);
 }

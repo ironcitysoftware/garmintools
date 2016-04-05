@@ -17,7 +17,7 @@
 package garmintools.sections;
 
 import garmintools.Proto;
-import garmintools.adapters.nativo.NativeAdapter;
+import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.wrappers.TableOfContentsEntry;
 
@@ -27,14 +27,14 @@ import java.nio.ByteBuffer;
 
 abstract class SectionFactory<T> {
   final int sectionNumber;
-  final NativeAdapter<T> nativeAdapter;
+  final GarminAdapter<T> garminAdapter;
   final ProtoAdapter<T> protoAdapter;
   final Class<?> sectionClass;
 
-  SectionFactory(int sectionNumber, NativeAdapter<T> nativeAdapter, ProtoAdapter<T> protoAdapter,
+  SectionFactory(int sectionNumber, GarminAdapter<T> garminAdapter, ProtoAdapter<T> protoAdapter,
       Class<?> sectionClass) {
     this.sectionNumber = sectionNumber;
-    this.nativeAdapter = nativeAdapter;
+    this.garminAdapter = garminAdapter;
     this.protoAdapter = protoAdapter;
     this.sectionClass = sectionClass;
   }
@@ -43,8 +43,8 @@ abstract class SectionFactory<T> {
     return sectionNumber;
   }
 
-  public Section<T> createFromNative(DataLengthSection dataLengthSection, TableOfContentsEntry entry, ByteBuffer byteBuffer) {
-    return createSection(nativeAdapter.read(dataLengthSection, entry, byteBuffer));
+  public Section<T> createFromGarmin(DataLengthSection dataLengthSection, TableOfContentsEntry entry, ByteBuffer byteBuffer) {
+    return createSection(garminAdapter.read(dataLengthSection, entry, byteBuffer));
   }
 
   public Section<T> createFromProto(Proto.NavigationData proto) {
@@ -56,7 +56,7 @@ abstract class SectionFactory<T> {
     try {
       for (Constructor<?> constructor : sectionClass.getDeclaredConstructors()) {
         if (constructor.getParameterTypes().length == 4) {
-          return (Section<T>) constructor.newInstance(sectionNumber, data, nativeAdapter, protoAdapter);
+          return (Section<T>) constructor.newInstance(sectionNumber, data, garminAdapter, protoAdapter);
         }
       }
       throw new IllegalStateException("Constructor not found for " + sectionClass.getName());

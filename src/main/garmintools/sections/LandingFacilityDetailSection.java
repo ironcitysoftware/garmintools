@@ -18,14 +18,14 @@ package garmintools.sections;
 
 import garmintools.Proto;
 import garmintools.Proto.NavigationData;
-import garmintools.adapters.nativo.LandingFacilityDetailNativeAdapter;
-import garmintools.adapters.nativo.LandingFacilityDetailNativeAdapter.NativeOutputAndIndexToOffset;
-import garmintools.adapters.nativo.NativeAdapter;
-import garmintools.adapters.nativo.NativeOutput;
+import garmintools.adapters.garmin.GarminAdapter;
+import garmintools.adapters.garmin.GarminOutput;
+import garmintools.adapters.garmin.LandingFacilityDetailGarminAdapter;
+import garmintools.adapters.garmin.LandingFacilityDetailGarminAdapter.GarminOutputAndIndexToOffset;
 import garmintools.adapters.proto.LandingFacilityDetailProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.keys.IndexForeignKey;
-import garmintools.keys.NativeOffsetForeignKey;
+import garmintools.keys.SectionOffsetForeignKey;
 import garmintools.wrappers.LandingFacilityDetail;
 
 import java.util.ArrayList;
@@ -36,19 +36,19 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 public class LandingFacilityDetailSection extends Section<List<LandingFacilityDetail>> {
-  private final Map<Integer, Integer> nativeOffsetToIndex;  // offset to index of read native data
-  private Map<Integer, Integer> indexToNativeOffset;  // index to offset of written native data
+  private final Map<Integer, Integer> sectionOffsetToIndex;  // offset to index of read data
+  private Map<Integer, Integer> indexToSectionOffset;  // index to offset of written data
 
   LandingFacilityDetailSection(int sectionNumber, List<LandingFacilityDetail> data,
-      NativeAdapter<List<LandingFacilityDetail>> nativeAdapter,
+      GarminAdapter<List<LandingFacilityDetail>> garminAdapter,
       ProtoAdapter<List<LandingFacilityDetail>> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, protoAdapter);
     ImmutableMap.Builder<Integer, Integer> mapBuilder = ImmutableMap.builder();
     for (int index = 0; index < data.size(); ++index) {
-      mapBuilder.put(data.get(index).nativeFileOffset, index);
+      mapBuilder.put(data.get(index).sectionOffset, index);
     }
-    this.nativeOffsetToIndex = mapBuilder.build();
-    this.indexToNativeOffset = new HashMap<>();
+    this.sectionOffsetToIndex = mapBuilder.build();
+    this.indexToSectionOffset = new HashMap<>();
   }
 
   public IndexForeignKey insert(LandingFacilityDetail landingFacilityDetail) {
@@ -56,13 +56,13 @@ public class LandingFacilityDetailSection extends Section<List<LandingFacilityDe
     return new IndexForeignKey(data.size() - 1);
   }
 
-  public NativeOffsetForeignKey getOffsetForIndex(IndexForeignKey key) {
-    int nativeOffset = indexToNativeOffset.get(key.getIndex());
-    return new NativeOffsetForeignKey(nativeOffset);
+  public SectionOffsetForeignKey getOffsetForIndex(IndexForeignKey key) {
+    int sectionOffset = indexToSectionOffset.get(key.getIndex());
+    return new SectionOffsetForeignKey(sectionOffset);
   }
 
-  public LandingFacilityDetail lookup(NativeOffsetForeignKey key) {
-    return data.get(nativeOffsetToIndex.get(key.getNativeOffset()));
+  public LandingFacilityDetail lookup(SectionOffsetForeignKey key) {
+    return data.get(sectionOffsetToIndex.get(key.getSectionOffset()));
   }
 
   @Override
@@ -71,16 +71,16 @@ public class LandingFacilityDetailSection extends Section<List<LandingFacilityDe
   }
 
   @Override
-  public NativeOutput getNativeBytes(SectionManager sectionManager) {
-    NativeOutputAndIndexToOffset nativeOutput = (NativeOutputAndIndexToOffset) nativeAdapter.write(data);
-    indexToNativeOffset = ImmutableMap.copyOf(nativeOutput.indexToOffset);
-    return nativeOutput;
+  public GarminOutput getSectionBytes(SectionManager sectionManager) {
+    GarminOutputAndIndexToOffset output = (GarminOutputAndIndexToOffset) garminAdapter.write(data);
+    indexToSectionOffset = ImmutableMap.copyOf(output.indexToOffset);
+    return output;
   }
 
   static class Factory extends SectionFactory<List<LandingFacilityDetail>> {
     Factory() {
       super(Ids.LANDING_FACILITY_DETAIL_SECTION,
-          new LandingFacilityDetailNativeAdapter(),
+          new LandingFacilityDetailGarminAdapter(),
           new LandingFacilityDetailProtoAdapter(),
           LandingFacilityDetailSection.class);
     }
@@ -88,7 +88,7 @@ public class LandingFacilityDetailSection extends Section<List<LandingFacilityDe
     @Override
     public LandingFacilityDetailSection createFromProto(NavigationData proto) {
       return new LandingFacilityDetailSection(sectionNumber, new ArrayList<LandingFacilityDetail>(),
-          nativeAdapter, protoAdapter);
+          garminAdapter, protoAdapter);
     }
   }
 }

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import garmintools.Proto;
 import garmintools.Proto.UnknownLandingFacilityDetailSection;
@@ -45,12 +45,12 @@ import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Ints;
 import com.google.protobuf.ByteString;
 
-public class LandingFacilityDetailNativeAdapter implements NativeAdapter<List<LandingFacilityDetail>> {
+public class LandingFacilityDetailGarminAdapter implements GarminAdapter<List<LandingFacilityDetail>> {
   private static final int NUM_NARRATIVE_LEADING_BITS = 7;
 
-  public static class NativeOutputAndIndexToOffset extends NativeOutput {
+  public static class GarminOutputAndIndexToOffset extends GarminOutput {
     public final Map<Integer, Integer> indexToOffset;
-    public NativeOutputAndIndexToOffset(byte data[], Map<Integer, Integer> indexToOffset) {
+    public GarminOutputAndIndexToOffset(byte data[], Map<Integer, Integer> indexToOffset) {
       super(data);
       this.indexToOffset = indexToOffset;
     }
@@ -71,7 +71,7 @@ public class LandingFacilityDetailNativeAdapter implements NativeAdapter<List<La
 
     int offset = byteBuffer.position();
     // System.err.printf("Parsing detail offset %06d %06x (%06x)\n", offset, offset, 0x14ea0f + offset);
-    builder.withNativeFileOffset(offset);
+    builder.withSectionOffset(offset);
 
     Queue<Integer> sectionLengths = new LinkedList<>();
     BitSet sectionsPresent = BitSet.valueOf(new long[] { byteBuffer.getShort() });
@@ -263,7 +263,7 @@ public class LandingFacilityDetailNativeAdapter implements NativeAdapter<List<La
   }
 
   @Override
-  public NativeOutput write(List<LandingFacilityDetail> landingFacilityDetails) {
+  public GarminOutput write(List<LandingFacilityDetail> landingFacilityDetails) {
     ImmutableMap.Builder<Integer, Integer> indexToOffset = ImmutableMap.builder();
     ByteArrayDataOutput output = new LittleEndianByteArrayDataOutput(ByteStreams.newDataOutput());
     for (int index = 0; index < landingFacilityDetails.size(); ++index) {
@@ -272,7 +272,7 @@ public class LandingFacilityDetailNativeAdapter implements NativeAdapter<List<La
       // System.err.printf("Encoding detail offset %06d %06x (%06x)\n", offset, offset, 0x14ea0f + offset);
       encode(landingFacilityDetails.get(index), output);
     }
-    return new NativeOutputAndIndexToOffset(output.toByteArray(), indexToOffset.build());
+    return new GarminOutputAndIndexToOffset(output.toByteArray(), indexToOffset.build());
   }
 
   private void encode(LandingFacilityDetail detail, ByteArrayDataOutput output) {

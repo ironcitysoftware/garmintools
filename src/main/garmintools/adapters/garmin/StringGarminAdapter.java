@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import garmintools.encoding.BitBuffer;
 import garmintools.encoding.BitListOutputStream;
@@ -29,10 +29,10 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-public class StringNativeAdapter implements NativeAdapter<List<String>> {
-  public static class NativeOutputAndKeys extends NativeOutput {
+public class StringGarminAdapter implements GarminAdapter<List<String>> {
+  public static class GarminOutputAndKeys extends GarminOutput {
     public final List<VariableLengthEncodingForeignKey> keys;
-    public NativeOutputAndKeys(byte data[], List<VariableLengthEncodingForeignKey> keys) {
+    public GarminOutputAndKeys(byte data[], List<VariableLengthEncodingForeignKey> keys) {
       super(data);
       this.keys = keys;
     }
@@ -55,7 +55,7 @@ public class StringNativeAdapter implements NativeAdapter<List<String>> {
   }
 
   @Override
-  public NativeOutput write(List<String> strings) {
+  public GarminOutput write(List<String> strings) {
     BitListOutputStream bitListOutputStream = new BitListOutputStream();
     VariableLengthAsciiEncoding encoding = new VariableLengthAsciiEncoding(bitListOutputStream);
     ImmutableList.Builder<VariableLengthEncodingForeignKey> listBuilder = ImmutableList.builder();
@@ -63,6 +63,6 @@ public class StringNativeAdapter implements NativeAdapter<List<String>> {
       listBuilder.add(bitListOutputStream.getKey());
       encoding.encodeExtended(string);
     }
-    return new NativeOutputAndKeys(bitListOutputStream.toByteArray(), listBuilder.build());
+    return new GarminOutputAndKeys(bitListOutputStream.toByteArray(), listBuilder.build());
   }
 }

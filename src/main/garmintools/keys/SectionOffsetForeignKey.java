@@ -18,28 +18,28 @@ package garmintools.keys;
 
 import com.google.common.primitives.Ints;
 
-public class NativeOffsetForeignKey {
-  private final int nativeOffset;
+public class SectionOffsetForeignKey {
+  private final int sectionOffset;
 
-  public NativeOffsetForeignKey(int nativeOffset) {
-    this.nativeOffset = nativeOffset;
+  public SectionOffsetForeignKey(int sectionOffset) {
+    this.sectionOffset = sectionOffset;
   }
 
-  public int getNativeOffset() {
-    return nativeOffset;
+  public int getSectionOffset() {
+    return sectionOffset;
   }
 
   @Override
   public boolean equals(Object that) {
-    if (that == null || !(that instanceof NativeOffsetForeignKey)) {
+    if (that == null || !(that instanceof SectionOffsetForeignKey)) {
       return false;
     }
-    NativeOffsetForeignKey thatKey = (NativeOffsetForeignKey) that;
-    return nativeOffset == thatKey.nativeOffset;
+    SectionOffsetForeignKey thatKey = (SectionOffsetForeignKey) that;
+    return sectionOffset == thatKey.sectionOffset;
   }
 
   @Override
   public int hashCode() {
-    return Ints.hashCode(nativeOffset);
+    return Ints.hashCode(sectionOffset);
   }
 }

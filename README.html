@@ -34,6 +34,7 @@
   <a href=http://www.iso.org/iso/home/standards/management-standards/iso_9000.htm>ISO 9001</a>
   and <a href=http://rtca.org/>RTCA</a> DO-200A.  This software has not been certified to either
   of these standards.
+  </p>
 
   <a id="description" />
   <h2>Description</h2>
@@ -75,7 +76,7 @@
   </li>
   </ul>
 
-  <a id="db">
+  <a id="db" />
   <h2>Garmin Navigation Databases</h2>
 
   The Garmin navigation database file format is a compact binary encoding of aviation information.
@@ -106,18 +107,18 @@ search engine.</li>
 
   </ul>
 
-  <a id="dev">
+  <a id="dev" />
   <h2>Development Notes</h2>
 
   <ul>
-    <li><code>garmintools.adapters.nativo</code> - This package converts to and from the native Garmin format and internal
+    <li><code>garmintools.adapters.garmin</code> - This package converts to and from the Garmin format and internal
     representations.  The internal representations are protocol buffers or wrapped protocol buffers.</li>
 
     <li><code>garmintools.adapters.proto</code> - This package converts to and from a Google protocol buffer representation
     and internal representations.</li>
  
     <li><code>garmintools.normalize</code> - This package is responsible for normalizing and denormalizing file sections.
-    The native format is heavily normalized, with data containing foreign keys to other sections.  The protocol
+    The Garmin format is heavily normalized, with data containing foreign keys to other sections.  The protocol
     buffer representation is entirely denormalized, with data being repeated as necessary.</li>
 
     <li><code>garmintools.sections</code> - This package represents custom code necessary for processing individual sections

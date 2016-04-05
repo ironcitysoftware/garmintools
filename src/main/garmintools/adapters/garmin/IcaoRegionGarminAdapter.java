@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import static garmintools.encoding.SixBitAsciiEncoding.SIMPLE_ENCODING;
 import garmintools.Proto;
@@ -30,7 +30,7 @@ import java.util.List;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 
-public class IcaoRegionNativeAdapter implements NativeAdapter<List<Proto.IcaoRegion>> {
+public class IcaoRegionGarminAdapter implements GarminAdapter<List<Proto.IcaoRegion>> {
   @Override
   public List<Proto.IcaoRegion> read(DataLengthSection dataLengthSection, TableOfContentsEntry entry, ByteBuffer byteBuffer) {
     ImmutableList.Builder<Proto.IcaoRegion> listBuilder = ImmutableList.builder();
@@ -47,15 +47,15 @@ public class IcaoRegionNativeAdapter implements NativeAdapter<List<Proto.IcaoReg
   }
 
   @Override
-  public NativeOutput write(List<Proto.IcaoRegion> icaoRegions) {
+  public GarminOutput write(List<Proto.IcaoRegion> icaoRegions) {
     int longestString = SizeUtil.getLargest(icaoRegions, SIZEOF);
-    NativeOutput nativeOutput = new NativeOutput(icaoRegions.size(),
+    GarminOutput output = new GarminOutput(icaoRegions.size(),
         SixBitAsciiEncoding.getEncodedSize(longestString));
     for (Proto.IcaoRegion icaoRegion : icaoRegions) {
       String text = icaoRegion.getLandingFacilityIdentifierPrefix() + icaoRegion.getRegion();
-      nativeOutput.put(SIMPLE_ENCODING.encode(StringUtil.pad(text, longestString)));
+      output.put(SIMPLE_ENCODING.encode(StringUtil.pad(text, longestString)));
     }
-    return nativeOutput;
+    return output;
   }
 
   private static Function<Proto.IcaoRegion, Integer> SIZEOF = new Function<Proto.IcaoRegion, Integer>() {

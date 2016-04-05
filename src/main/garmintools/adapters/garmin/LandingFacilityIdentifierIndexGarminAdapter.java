@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import garmintools.sections.DataLengthSection;
 import garmintools.wrappers.TableOfContentsEntry;
@@ -25,7 +25,7 @@ import java.util.Map;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-public class LandingFacilityIdentifierIndexNativeAdapter implements NativeAdapter<Map<Byte, Integer>> {
+public class LandingFacilityIdentifierIndexGarminAdapter implements GarminAdapter<Map<Byte, Integer>> {
   /** Prefixes with this index are not present in the landing facilities section. */
   private static final int NOT_PRESENT_INDEX_MARKER = 0x3ffff;
   private static final int NUM_ENTRIES = 164;
@@ -47,19 +47,19 @@ public class LandingFacilityIdentifierIndexNativeAdapter implements NativeAdapte
   }
 
   @Override
-  public NativeOutput write(Map<Byte, Integer> prefixByteToIndex) {
-    NativeOutput nativeOutput = new NativeOutput(NUM_ENTRIES, 3);
+  public GarminOutput write(Map<Byte, Integer> prefixByteToIndex) {
+    GarminOutput output = new GarminOutput(NUM_ENTRIES, 3);
     for (int i = 4; i < NUM_ENTRIES + 4; ++i) {
       byte prefixByte = (byte) i;
       if (prefixByteToIndex.containsKey(prefixByte)) {
         int offset = prefixByteToIndex.get(prefixByte);
-        nativeOutput.putShort((short) (offset & 0xffff));
-        nativeOutput.put((byte) ((offset >> 16) & 0xff));
+        output.putShort((short) (offset & 0xffff));
+        output.put((byte) ((offset >> 16) & 0xff));
       } else {
-        nativeOutput.putShort((short) 0xffff);
-        nativeOutput.put((byte) 0x3);
+        output.putShort((short) 0xffff);
+        output.put((byte) 0x3);
       }
     }
-    return nativeOutput;
+    return output;
   }
 }

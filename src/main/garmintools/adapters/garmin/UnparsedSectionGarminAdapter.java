@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import garmintools.Proto;
 import garmintools.Proto.UnparsedSection;
@@ -25,10 +25,10 @@ import java.nio.ByteBuffer;
 
 import com.google.protobuf.ByteString;
 
-public class UnparsedSectionNativeAdapter implements NativeAdapter<Proto.UnparsedSection> {
+public class UnparsedSectionGarminAdapter implements GarminAdapter<Proto.UnparsedSection> {
   private final int sectionNumber;
 
-  public UnparsedSectionNativeAdapter(int sectionNumber) {
+  public UnparsedSectionGarminAdapter(int sectionNumber) {
     this.sectionNumber = sectionNumber;
   }
 
@@ -43,11 +43,11 @@ public class UnparsedSectionNativeAdapter implements NativeAdapter<Proto.Unparse
   }
 
   @Override
-  public NativeOutput write(UnparsedSection unparsedSection) {
-    NativeOutput nativeOutput =
-        new NativeOutput(unparsedSection.getItemQuantity(), unparsedSection.getItemLength(),
+  public GarminOutput write(UnparsedSection unparsedSection) {
+    GarminOutput output =
+        new GarminOutput(unparsedSection.getItemQuantity(), unparsedSection.getItemLength(),
             unparsedSection.getData().size());
-    nativeOutput.put(unparsedSection.getData().asReadOnlyByteBuffer());
-    return nativeOutput;
+    output.put(unparsedSection.getData().asReadOnlyByteBuffer());
+    return output;
   }
 }

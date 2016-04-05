@@ -17,22 +17,22 @@
 package garmintools.sections;
 
 import garmintools.Proto;
-import garmintools.adapters.nativo.NativeAdapter;
-import garmintools.adapters.nativo.UnparsedSectionNativeAdapter;
+import garmintools.adapters.garmin.GarminAdapter;
+import garmintools.adapters.garmin.UnparsedSectionGarminAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.adapters.proto.UnparsedSectionProtoAdapter;
 
 public class UnparsedSection extends Section<Proto.UnparsedSection> {
   UnparsedSection(int sectionNumber, Proto.UnparsedSection data,
-      NativeAdapter<Proto.UnparsedSection> nativeAdapter,
+      GarminAdapter<Proto.UnparsedSection> garminAdapter,
       ProtoAdapter<Proto.UnparsedSection> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, protoAdapter);
   }
 
   static class Factory extends SectionFactory<Proto.UnparsedSection> {
     Factory(int sectionNumber) {
       super(sectionNumber,
-          new UnparsedSectionNativeAdapter(sectionNumber),
+          new UnparsedSectionGarminAdapter(sectionNumber),
           new UnparsedSectionProtoAdapter(sectionNumber),
           UnparsedSection.class);
     }

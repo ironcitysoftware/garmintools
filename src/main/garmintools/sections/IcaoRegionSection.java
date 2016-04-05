@@ -17,8 +17,8 @@
 package garmintools.sections;
 
 import garmintools.Proto;
-import garmintools.adapters.nativo.IcaoRegionNativeAdapter;
-import garmintools.adapters.nativo.NativeAdapter;
+import garmintools.adapters.garmin.IcaoRegionGarminAdapter;
+import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.proto.IcaoRegionProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.keys.IndexForeignKey;
@@ -29,9 +29,9 @@ import com.google.common.base.Preconditions;
 
 public class IcaoRegionSection extends Section<List<Proto.IcaoRegion>> {
   IcaoRegionSection(int sectionNumber, List<Proto.IcaoRegion> data,
-      NativeAdapter<List<Proto.IcaoRegion>> nativeAdapter,
+      GarminAdapter<List<Proto.IcaoRegion>> garminAdapter,
       ProtoAdapter<List<Proto.IcaoRegion>> protoAdapter) {
-    super(sectionNumber, data, nativeAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, protoAdapter);
   }
 
   public IndexForeignKey lookupByRegion(Proto.IcaoRegion region) {
@@ -47,7 +47,7 @@ public class IcaoRegionSection extends Section<List<Proto.IcaoRegion>> {
   static class Factory extends SectionFactory<List<Proto.IcaoRegion>> {
     Factory() {
       super(Ids.ICAO_REGION_SECTION,
-          new IcaoRegionNativeAdapter(),
+          new IcaoRegionGarminAdapter(),
           new IcaoRegionProtoAdapter(),
           IcaoRegionSection.class);
     }

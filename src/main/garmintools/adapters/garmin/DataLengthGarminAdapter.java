@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package garmintools.adapters.nativo;
+package garmintools.adapters.garmin;
 
 import garmintools.sections.DataLengthSection;
 import garmintools.wrappers.TableOfContentsEntry;
@@ -25,7 +25,7 @@ import java.util.List;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
-public class DataLengthNativeAdapter implements NativeAdapter<List<Integer>> {
+public class DataLengthGarminAdapter implements GarminAdapter<List<Integer>> {
   @Override
   public List<Integer> read(DataLengthSection dataLengthSection, TableOfContentsEntry entry, ByteBuffer byteBuffer) {
     ImmutableList.Builder<Integer> listBuilder = ImmutableList.builder();
@@ -38,11 +38,11 @@ public class DataLengthNativeAdapter implements NativeAdapter<List<Integer>> {
   }
 
   @Override
-  public NativeOutput write(List<Integer> dataLengths) {
-    NativeOutput nativeOutput = new NativeOutput(dataLengths.size(), 2);
+  public GarminOutput write(List<Integer> dataLengths) {
+    GarminOutput output = new GarminOutput(dataLengths.size(), 2);
     for (int dataLength : dataLengths) {
-      nativeOutput.putShort((short) dataLength);
+      output.putShort((short) dataLength);
     }
-    return nativeOutput;
+    return output;
   }
 }

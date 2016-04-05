@@ -18,7 +18,7 @@ package garmintools.wrappers;
 
 import garmintools.Proto;
 import garmintools.keys.IndexForeignKey;
-import garmintools.keys.NativeOffsetForeignKey;
+import garmintools.keys.SectionOffsetForeignKey;
 import garmintools.keys.VariableLengthEncodingForeignKey;
 
 public class LandingFacility {
@@ -29,7 +29,7 @@ public class LandingFacility {
   public final IndexForeignKey landingFacilityType;
   public final VariableLengthEncodingForeignKey name;
   public final IndexForeignKey nameIndex;
-  public final NativeOffsetForeignKey detail;
+  public final SectionOffsetForeignKey detail;
   public final IndexForeignKey detailIndex;
   public final VariableLengthEncodingForeignKey location;
   public final IndexForeignKey locationIndex;
@@ -66,7 +66,7 @@ public class LandingFacility {
     private IndexForeignKey landingFacilityType;
     private VariableLengthEncodingForeignKey name;
     private IndexForeignKey nameIndex;
-    private NativeOffsetForeignKey detail;
+    private SectionOffsetForeignKey detail;
     private IndexForeignKey detailIndex;
     private VariableLengthEncodingForeignKey location;
     private IndexForeignKey locationIndex;
@@ -96,7 +96,7 @@ public class LandingFacility {
     public Builder withLandingFacilityType(IndexForeignKey key) { this.landingFacilityType = key; return this; }
     public Builder withName(VariableLengthEncodingForeignKey key) { this.name = key; return this; }
     public Builder withNameIndex(IndexForeignKey key) { this.nameIndex = key; return this; }
-    public Builder withDetail(NativeOffsetForeignKey key) { this.detail = key; return this; }
+    public Builder withDetail(SectionOffsetForeignKey key) { this.detail = key; return this; }
     public Builder withDetailIndex(IndexForeignKey key) { this.detailIndex = key; return this; }
     public Builder withLocation(VariableLengthEncodingForeignKey key) { this.location = key; return this; }
     public Builder withLocationIndex(IndexForeignKey key) { this.locationIndex = key; return this; }
