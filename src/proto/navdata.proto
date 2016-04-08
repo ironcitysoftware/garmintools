@@ -30,7 +30,6 @@ message NavigationData {
   repeated CoordinateSystem coordinate_system = 3;
   repeated IcaoRegion icao_region = 4;
   repeated LandingFacility landing_facility = 5;
-  repeated string navigation_fix = 7;
 
   // Truly optional.  When decoding, the string tables are stored here to allow
   // for lossless encoding even if some of the values are not ever used.
