@@ -89,10 +89,11 @@ public class SixBitAsciiEncoding {
   public static final SixBitAsciiEncoding SIMPLE_ENCODING = new SixBitAsciiEncoding(SIMPLE_TRANSFORMS);
   public static final SixBitAsciiEncoding COMPLEX_ENCODING = new SixBitAsciiEncoding(COMPLEX_TRANSFORMS);
 
-  // 4 ASCII characters per 3 bytes.  Has to be a multiple of 3.
+  // 4 ASCII characters per 3 bytes.
   public static int getEncodedSize(int plainTextLength) {
-    int byteSize = (plainTextLength + 1) * 3 / 4;
-    return Math.round((byteSize + 2) / 3) * 3;
+    int whole = plainTextLength / 4 * 3;
+    int partial = plainTextLength % 4;
+    return whole + partial;
   }
 
   public static int getDecodedSize(int encodedLength) {
@@ -105,43 +106,85 @@ public class SixBitAsciiEncoding {
     this.transformFunctions = transformFunctions;
   }
 
-  public String decode(byte data[]) {
-    Preconditions.checkState(data.length % 3 == 0);
-    String result = "";
+  private static class EncodedInput {
+    private byte[] data;
+    private int maskIndex;
+    private int dataIndex;
+
+    EncodedInput(byte[] data) {
+      this.data = data;
+      this.dataIndex = data.length - 1;
+      this.maskIndex = 0;
+    }
+
+    boolean hasNext() {
+      return dataIndex >= 0;
+    }
 
     // b0       b1       b2
     // -------- -------- 654321-- first character
     // -------- 4321---- ------65 second character
     // 21------ ----6543 -------- third character
     // --654321 -------- -------- fourth character
+    //
+    // e.g.
+    // 0x64    |0xc1    |0x12    |0x04    | encoded bytes
+    // (b2)    |(b0)    |(b1)    |(b2)    |
+    // --------+--------+--------+--------+
+    // 011001  |        |        |        | Y (0x25)
+    //       00|        |        |        | unused (would be part of next letter)
+    //         |11      |    0010|        | K (0x11) (11 from 0xc1 is low portion)
+    //         |  000001|        |        | A (0x01)
+    //         |        |0001    |      00| A (0x01) (0001 from 0x12 is low portion)
+    //         |        |        |000001  | A (0x01)
 
+    int next() {
+      Preconditions.checkState(hasNext());
+      switch(maskIndex++ % 4) {
+      case 0:
+        return (data[dataIndex--] >> 2) & 0x3f;
+      case 1:
+        int result = ((data[dataIndex + 1] << 4) & 0x30) | ((data[dataIndex] >> 4) & 0xf);
+        dataIndex--;
+        return result;
+      case 2:
+        return ((data[dataIndex + 1] << 2) & 0x3c) | ((data[dataIndex] >> 6) & 0x3);
+      case 3:
+        return data[dataIndex--] & 0x3f;
+      default: throw new IllegalStateException();
+      }
+    }
+  }
+
+  public String decode(byte data[]) {
+    String result = "";
     Function<Integer, Character> adjuster = transformFunctions.getDecodingTransformFunction();
-    for (int i = 0; i < data.length; i += 3) {
-      String segment = ""
-          + adjuster.apply((data[i + 2] >> 2) & 0x3f)
-          + adjuster.apply(((data[i + 2] << 4) & 0x30) | ((data[i + 1] >> 4) & 0xf))
-          + adjuster.apply(((data[i + 1] << 2) & 0x3c) | ((data[i] >> 6) & 0x3))
-          + adjuster.apply(data[i] & 0x3f);
-      result = segment + result;
+    EncodedInput input = new EncodedInput(data);
+    while (input.hasNext()) {
+      result += adjuster.apply(input.next());
     }
     return result;
   }
 
   public byte[] encode(String text) {
     byte result[] = new byte[getEncodedSize(text.length())];
-    int byteIndex = 0;
+    int byteIndex = result.length - 1;
 
     Function<Character, Integer> adjuster = transformFunctions.getEncodingTransformFunction();
-    for (int i = text.length() - 1; i >= 0; i -= 4) {
-      int encoded[] = {
-          i - 3 < 0 ? 0 : adjuster.apply(text.charAt(i - 3)),
-          i - 2 < 0 ? 0 : adjuster.apply(text.charAt(i - 2)),
-          i - 1 < 0 ? 0 : adjuster.apply(text.charAt(i - 1)),
-          adjuster.apply(text.charAt(i))
+    for (int i = 0; i < text.length(); i += 4) {
+      int adjusted[] = {
+          adjuster.apply(text.charAt(i)),
+          i + 1 >= text.length() ? 0 : adjuster.apply(text.charAt(i + 1)),
+          i + 2 >= text.length() ? 0 : adjuster.apply(text.charAt(i + 2)),
+          i + 3 >= text.length() ? 0 : adjuster.apply(text.charAt(i + 3))
       };
-      result[byteIndex++] = (byte) (((encoded[3] & 0x3F))      | ((encoded[2] & 0x03) << 6));
-      result[byteIndex++] = (byte) (((encoded[2] & 0x3C) >> 2) | ((encoded[1] & 0x0F) << 4));
-      result[byteIndex++] = (byte) (((encoded[1] & 0x3F) >> 4) | ((encoded[0] & 0x3F) << 2));
+      result[byteIndex--] = (byte) (((adjusted[1] & 0x3F) >> 4) | ((adjusted[0] & 0x3F) << 2));
+      if (byteIndex >= 0) {
+        result[byteIndex--] = (byte) (((adjusted[2] & 0x3C) >> 2) | ((adjusted[1] & 0x0F) << 4));
+        if (byteIndex >= 0) {
+          result[byteIndex--] = (byte) (((adjusted[3] & 0x3F)) | ((adjusted[2] & 0x03) << 6));
+        }
+      }
     }
     return result;
   }

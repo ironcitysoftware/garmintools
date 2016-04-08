@@ -63,7 +63,7 @@ public class SixBitAsciiEncodingTest {
   public void testAirportIdentifierA05() {
     byte b[] = Bytes.toArray(ImmutableList.of(0x25, 0x18, 0x0));
     assertEquals(" A05", COMPLEX_ENCODING.decode(b));
-    assertArrayEquals(b, COMPLEX_ENCODING.encode("A05"));
+    assertArrayEquals(b, COMPLEX_ENCODING.encode(" A05"));
   }
 
   @Test
@@ -77,6 +77,14 @@ public class SixBitAsciiEncodingTest {
   public void testIcaoRegionAlbania() {
     byte b[] = Bytes.toArray(ImmutableList.of(0x41, 0xe2, 0x4, 0x2, 0x13, 0x4, 0xc, 0x0, 0x0));
     assertEquals("   LAALBANIA", COMPLEX_ENCODING.decode(b));
-    assertArrayEquals(b, COMPLEX_ENCODING.encode("LAALBANIA"));
+    assertArrayEquals(b, COMPLEX_ENCODING.encode("   LAALBANIA"));
+  }
+
+  @Test
+  public void testFourBytes() {
+    byte b[] = Bytes.toArray(ImmutableList.of(0x64, 0xc1, 0x12, 0x04));
+    assertEquals("AAKAY", COMPLEX_ENCODING.decode(b));
+    assertEquals(4, SixBitAsciiEncoding.getEncodedSize("AAKAY".length()));
+    assertArrayEquals(b, COMPLEX_ENCODING.encode("AAKAY"));
   }
 }

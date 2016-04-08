@@ -50,7 +50,7 @@ public class SectionManager {
 
   // TODO: this is the work to do :-(
   private static final int[] UNPARSED_SECTIONS = new int[] {
-     4,  5,  7,  8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+     4,  5,  7,  8, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
     30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 45, 46, 50, 51, 52, 56, 57, 58, 61, 63,
     65, 66, 68, 69, 71, 72, 73, 74, 75, 78, 82, 83, 84, 85, 86, 88, 89, 90, 91, 92, 93, 94
   };
@@ -159,6 +159,7 @@ public class SectionManager {
       new LandingFacilityIdentifierIndexSection.Factory(),
       new LandingFacilitySection.Factory(),
       new LandingFacilityDetailSection.Factory(),
+      new NavigationFixSection.Factory(),
       new LookupTableSection.Factory(Ids.RUNWAY_LIGHTING_SECTION),
       new LookupTableSection.Factory(Ids.RUNWAY_SURFACE_SECTION),
       new LookupTableSection.Factory(Ids.GENERIC_AIRPORT_STRING_SECTION1),

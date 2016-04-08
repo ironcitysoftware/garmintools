@@ -23,6 +23,7 @@ public class Ids {
   public static final int LANDING_FACILITY_IDENTIFIER_INDEX_SECTION = 3;
   public static final int LANDING_FACILITY_SECTION = 6;
   public static final int LANDING_FACILITY_DETAIL_SECTION = 9;
+  public static final int NAVIGATION_FIX_SECTION = 10;
   public static final int COORDINATE_SYSTEM_SECTION = 41;
   public static final int RUNWAY_LIGHTING_SECTION = 47;
   public static final int RUNWAY_SURFACE_SECTION = 48;
