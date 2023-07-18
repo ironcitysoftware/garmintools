@@ -18,6 +18,7 @@ package garmintools.sections;
 
 import garmintools.Proto;
 import garmintools.adapters.garmin.GarminOutput;
+import garmintools.openaip.Airport;
 import garmintools.wrappers.TableOfContentsEntry;
 
 import java.io.IOException;
@@ -133,6 +134,12 @@ public class SectionManager {
     }
   }
 
+  public void mergeFromOpenAIP(List<Airport> airports) {
+    for (Section<?> section : sections.values()) {
+      section.mergeFromOpenAIP(this, airports);
+    }
+  }
+
   public void mergeToProto(Proto.NavigationData.Builder protoBuilder) {
     for (Section<?> section : sections.values()) {
       section.mergeToProto(this, protoBuilder);
@@ -227,8 +234,32 @@ public class SectionManager {
 
     public SectionManager build() {
       return new SectionManager(sections,
+            new AirspaceTable(),
+            new RunwayNumberSuffixTable());
+    }
+  }
+
+  public static class OpenAIPBuilder {
+    private final List<Airport> airports;
+    private final List<Section<?>> sections;
+
+    public OpenAIPBuilder(List<Airport> airports) {
+      this.airports = airports;
+      this.sections = new ArrayList<>();
+    }
+
+    public SectionManager build() {
+      for (int sectionNumber : DEFAULT_SECTION_ORDER) { // proto.getMetadata().getSectionList()) {
+        SectionFactory<?> sectionFactory = SECTION_FACTORIES.get(sectionNumber);
+        // System.out.println("Reading section " + sectionNumber);
+        Section<?> section = sectionFactory.createFromOpenAIP(airports); // first pass
+        sections.add(section);
+      }
+      SectionManager sectionManager = new SectionManager(sections,
           new AirspaceTable(),
           new RunwayNumberSuffixTable());
+      sectionManager.mergeFromOpenAIP(airports); // second pass
+      return sectionManager;
     }
   }
 

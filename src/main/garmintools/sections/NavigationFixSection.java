@@ -18,6 +18,8 @@ package garmintools.sections;
 
 import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.garmin.NavigationFixGarminAdapter;
+import garmintools.adapters.openaip.LookupTableOpenAIPAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
 import garmintools.adapters.proto.LookupTableProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.keys.IndexForeignKey;
@@ -27,8 +29,9 @@ import java.util.List;
 public class NavigationFixSection extends LookupTableSection {
   NavigationFixSection(int sectionNumber, List<String> data,
       GarminAdapter<List<String>> garminAdapter,
+      OpenAIPAdapter<List<String>> openAIPAdapter,
       ProtoAdapter<List<String>> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
   }
 
   @Override
@@ -49,6 +52,7 @@ public class NavigationFixSection extends LookupTableSection {
       super(Ids.NAVIGATION_FIX_SECTION,
           new NavigationFixGarminAdapter(),
           // TODO.  Remove temporary table when fixes are stored in instrument approach data.
+          new LookupTableOpenAIPAdapter(Ids.NAVIGATION_FIX_SECTION),
           new LookupTableProtoAdapter(Ids.NAVIGATION_FIX_SECTION),
           NavigationFixSection.class);
     }

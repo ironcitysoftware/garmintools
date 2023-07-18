@@ -18,6 +18,7 @@ package garmintools.files;
 
 import garmintools.Proto.NavigationData;
 import garmintools.adapters.garmin.MetadataGarminAdapter;
+import garmintools.openaip.Airport;
 import garmintools.sections.Ids;
 import garmintools.sections.SectionManager;
 import garmintools.sections.TableOfContentsSection;
@@ -28,8 +29,10 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CountingInputStream;
@@ -68,5 +71,10 @@ public class NavigationDataFileFactory {
   public ProtoNavigationDataFile createFromProto(NavigationData proto) {
     SectionManager.ProtoBuilder sectionManagerBuilder = new SectionManager.ProtoBuilder(proto);
     return new ProtoNavigationDataFile(sectionManagerBuilder.build());
+  }
+
+  public OpenAIPNavigationDataFile createFromOpenAIP(List<Airport> airports) {
+    SectionManager.OpenAIPBuilder sectionManagerBuilder = new SectionManager.OpenAIPBuilder(airports);
+    return new OpenAIPNavigationDataFile(sectionManagerBuilder.build());
   }
 }

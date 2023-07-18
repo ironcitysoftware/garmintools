@@ -20,6 +20,8 @@ import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.garmin.GarminOutput;
 import garmintools.adapters.garmin.StringGarminAdapter;
 import garmintools.adapters.garmin.StringGarminAdapter.GarminOutputAndKeys;
+import garmintools.adapters.openaip.OpenAIPAdapter;
+import garmintools.adapters.openaip.StringOpenAIPAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.adapters.proto.StringProtoAdapter;
 import garmintools.keys.IndexForeignKey;
@@ -46,16 +48,18 @@ public class StringSection extends Section<List<String>> {
   // read from proto
   public StringSection(int sectionNumber, List<String> data,
       GarminAdapter<List<String>> garminAdapter,
+      OpenAIPAdapter<List<String>> openAIPAdapter,
       ProtoAdapter<List<String>> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
   }
 
   // read from garmin
   public StringSection(int sectionNumber, List<String> data,
       List<VariableLengthEncodingForeignKey> keys,
       GarminAdapter<List<String>> garminAdapter,
+      OpenAIPAdapter<List<String>> openAIPAdapter,
       ProtoAdapter<List<String>> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
     readKeys = keys;
   }
 
@@ -104,6 +108,7 @@ public class StringSection extends Section<List<String>> {
     Factory() {
       super(Ids.STRING_SECTION,
           new StringGarminAdapter(),
+          new StringOpenAIPAdapter(),
           new StringProtoAdapter(),
           StringSection.class);
     }
@@ -122,6 +127,7 @@ public class StringSection extends Section<List<String>> {
           strings.build(),
           keys.build(),
           garminAdapter,
+          openAIPAdapter,
           protoAdapter);
     }
   }

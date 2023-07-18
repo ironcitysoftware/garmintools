@@ -19,6 +19,8 @@ package garmintools.sections;
 import garmintools.Proto;
 import garmintools.Proto.NavigationData;
 import garmintools.adapters.garmin.LandingFacilityIdentifierIndexGarminAdapter;
+import garmintools.adapters.openaip.LandingFacilityIdentifierOpenAIPAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
 import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.keys.IndexForeignKey;
@@ -45,8 +47,9 @@ public class LandingFacilityIdentifierIndexSection extends Section <Map<Byte, In
 
   LandingFacilityIdentifierIndexSection(int sectionNumber, Map<Byte, Integer> data,
       GarminAdapter<Map<Byte, Integer>> garminAdapter,
+      OpenAIPAdapter<Map<Byte, Integer>> openAIPAdapter,
       ProtoAdapter<Map<Byte, Integer>> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
     Map<Integer, Byte> inverse = HashBiMap.create(data).inverse();
     List<Integer> sortedOffsets = new ArrayList<Integer>(inverse.keySet());
     Collections.sort(sortedOffsets);
@@ -86,14 +89,14 @@ public class LandingFacilityIdentifierIndexSection extends Section <Map<Byte, In
     Factory() {
       super(Ids.LANDING_FACILITY_IDENTIFIER_INDEX_SECTION,
           new LandingFacilityIdentifierIndexGarminAdapter(),
-          null,
+          new LandingFacilityIdentifierOpenAIPAdapter(), null,
           LandingFacilityIdentifierIndexSection.class);
     }
 
     @Override
     public LandingFacilityIdentifierIndexSection createFromProto(NavigationData proto) {
       return new LandingFacilityIdentifierIndexSection(sectionNumber, new HashMap<Byte, Integer>(),
-          garminAdapter, protoAdapter);
+          garminAdapter, openAIPAdapter, protoAdapter);
     }
   }
 }

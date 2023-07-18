@@ -18,6 +18,8 @@ package garmintools.sections;
 
 import garmintools.Proto;
 import garmintools.adapters.garmin.MetadataGarminAdapter;
+import garmintools.adapters.openaip.MetadataOpenAIPAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
 import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.proto.MetadataProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
@@ -25,14 +27,16 @@ import garmintools.adapters.proto.ProtoAdapter;
 public class MetadataSection extends Section<Proto.Metadata> {
   MetadataSection(int sectionNumber, Proto.Metadata data,
       GarminAdapter<Proto.Metadata> garminAdapter,
+      OpenAIPAdapter<Proto.Metadata> openAIPAdapter,
       ProtoAdapter<Proto.Metadata> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
   }
 
   static class Factory extends SectionFactory<Proto.Metadata> {
     Factory() {
       super(Ids.METADATA_SECTION,
           new MetadataGarminAdapter(),
+          new MetadataOpenAIPAdapter(),
           new MetadataProtoAdapter(),
           MetadataSection.class);
     }

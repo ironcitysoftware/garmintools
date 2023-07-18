@@ -18,6 +18,8 @@ package garmintools.sections;
 
 import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.garmin.TableOfContentsGarminAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
+import garmintools.adapters.openaip.TableOfContentsOpenAIPAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.adapters.proto.TableOfContentsProtoAdapter;
 import garmintools.wrappers.TableOfContents;
@@ -39,9 +41,9 @@ import com.google.common.base.Joiner;
  */
 public class TableOfContentsSection extends Section<TableOfContents> {
   TableOfContentsSection(int sectionNumber, TableOfContents data,
-      GarminAdapter<TableOfContents> garminAdapter,
+      GarminAdapter<TableOfContents> garminAdapter, OpenAIPAdapter<TableOfContents> openAIPAdapter,
       ProtoAdapter<TableOfContents> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
   }
 
   public Map<Integer, TableOfContentsEntry> getEntryMap() {
@@ -81,6 +83,7 @@ public class TableOfContentsSection extends Section<TableOfContents> {
     Factory() {
       super(Ids.TABLE_OF_CONTENTS_SECTION,
           new TableOfContentsGarminAdapter(),
+          new TableOfContentsOpenAIPAdapter(),
           new TableOfContentsProtoAdapter(),
           TableOfContentsSection.class);
     }
@@ -88,7 +91,7 @@ public class TableOfContentsSection extends Section<TableOfContents> {
     public TableOfContentsSection createFromGarmin(InputStream inputStream, int inputFileLength)
         throws IOException {
       TableOfContents data = ((TableOfContentsGarminAdapter) garminAdapter).read(inputStream, inputFileLength);
-      return new TableOfContentsSection(sectionNumber, data, garminAdapter, protoAdapter);
+      return new TableOfContentsSection(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
     }
   }
 }
