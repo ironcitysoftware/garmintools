@@ -18,23 +18,28 @@ package garmintools.sections;
 
 import garmintools.Proto;
 import garmintools.adapters.garmin.GarminAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
+import garmintools.openaip.Airport;
 import garmintools.wrappers.TableOfContentsEntry;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 abstract class SectionFactory<T> {
   final int sectionNumber;
   final GarminAdapter<T> garminAdapter;
+  final OpenAIPAdapter<T> openAIPAdapter;
   final ProtoAdapter<T> protoAdapter;
   final Class<?> sectionClass;
 
-  SectionFactory(int sectionNumber, GarminAdapter<T> garminAdapter, ProtoAdapter<T> protoAdapter,
-      Class<?> sectionClass) {
+  SectionFactory(int sectionNumber, GarminAdapter<T> garminAdapter, OpenAIPAdapter<T> openAIPAdapter,
+      ProtoAdapter<T> protoAdapter, Class<?> sectionClass) {
     this.sectionNumber = sectionNumber;
     this.garminAdapter = garminAdapter;
+    this.openAIPAdapter = openAIPAdapter;
     this.protoAdapter = protoAdapter;
     this.sectionClass = sectionClass;
   }
@@ -47,6 +52,10 @@ abstract class SectionFactory<T> {
     return createSection(garminAdapter.read(dataLengthSection, entry, byteBuffer));
   }
 
+  public Section<T> createFromOpenAIP(List<Airport> airports) {
+    return createSection(openAIPAdapter.read(airports));
+  }
+
   public Section<T> createFromProto(Proto.NavigationData proto) {
     return createSection(protoAdapter.read(proto));
   }
@@ -55,8 +64,8 @@ abstract class SectionFactory<T> {
   private Section<T> createSection(T data) {
     try {
       for (Constructor<?> constructor : sectionClass.getDeclaredConstructors()) {
-        if (constructor.getParameterTypes().length == 4) {
-          return (Section<T>) constructor.newInstance(sectionNumber, data, garminAdapter, protoAdapter);
+        if (constructor.getParameterTypes().length == 5) {
+          return (Section<T>) constructor.newInstance(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
         }
       }
       throw new IllegalStateException("Constructor not found for " + sectionClass.getName());

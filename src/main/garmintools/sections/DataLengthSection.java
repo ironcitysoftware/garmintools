@@ -18,6 +18,8 @@ package garmintools.sections;
 
 import garmintools.adapters.garmin.DataLengthGarminAdapter;
 import garmintools.adapters.garmin.GarminAdapter;
+import garmintools.adapters.openaip.DataLengthOpenAIPAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
 import garmintools.adapters.proto.DataLengthProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 
@@ -26,8 +28,9 @@ import java.util.List;
 public class DataLengthSection extends Section<List<Integer>> {
   DataLengthSection(int sectionNumber, List<Integer> data,
       GarminAdapter<List<Integer>> garminAdapter,
+      OpenAIPAdapter<List<Integer>> openAIPAdapter,
       ProtoAdapter<List<Integer>> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
   }
 
   public enum DataLength {
@@ -131,6 +134,7 @@ public class DataLengthSection extends Section<List<Integer>> {
     Factory() {
       super(Ids.DATA_LENGTH_SECTION,
           new DataLengthGarminAdapter(),
+          new DataLengthOpenAIPAdapter(),
           new DataLengthProtoAdapter(),
           DataLengthSection.class);
     }

@@ -19,20 +19,24 @@ package garmintools.sections;
 import garmintools.Proto;
 import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.garmin.UnparsedSectionGarminAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
+import garmintools.adapters.openaip.UnparsedSectionOpenAIPAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.adapters.proto.UnparsedSectionProtoAdapter;
 
 public class UnparsedSection extends Section<Proto.UnparsedSection> {
   UnparsedSection(int sectionNumber, Proto.UnparsedSection data,
       GarminAdapter<Proto.UnparsedSection> garminAdapter,
+      OpenAIPAdapter<Proto.UnparsedSection> openAIPAdapter,
       ProtoAdapter<Proto.UnparsedSection> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
   }
 
   static class Factory extends SectionFactory<Proto.UnparsedSection> {
     Factory(int sectionNumber) {
       super(sectionNumber,
           new UnparsedSectionGarminAdapter(sectionNumber),
+          new UnparsedSectionOpenAIPAdapter(sectionNumber),
           new UnparsedSectionProtoAdapter(sectionNumber),
           UnparsedSection.class);
     }

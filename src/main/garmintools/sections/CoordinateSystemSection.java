@@ -19,6 +19,8 @@ package garmintools.sections;
 import garmintools.Proto;
 import garmintools.adapters.garmin.CoordinateSystemGarminAdapter;
 import garmintools.adapters.garmin.GarminAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
+import garmintools.adapters.openaip.CoordinateSystemOpenAIPAdapter;
 import garmintools.adapters.proto.CoordinateSystemProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 
@@ -27,14 +29,16 @@ import java.util.List;
 public class CoordinateSystemSection extends Section<List<Proto.CoordinateSystem>> {
   CoordinateSystemSection(int sectionNumber, List<Proto.CoordinateSystem> data,
       GarminAdapter<List<Proto.CoordinateSystem>> garminAdapter,
+      OpenAIPAdapter<List<Proto.CoordinateSystem>> openAIPAdapter,
       ProtoAdapter<List<Proto.CoordinateSystem>> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
   }
 
   static class Factory extends SectionFactory<List<Proto.CoordinateSystem>> {
     Factory() {
       super(Ids.COORDINATE_SYSTEM_SECTION,
           new CoordinateSystemGarminAdapter(),
+          new CoordinateSystemOpenAIPAdapter(),
           new CoordinateSystemProtoAdapter(),
           CoordinateSystemSection.class);
     }

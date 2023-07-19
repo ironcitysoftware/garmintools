@@ -16,22 +16,36 @@
 
 package garmintools.sections;
 
+import java.util.List;
+
 import garmintools.Proto;
 import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.garmin.GarminOutput;
+import garmintools.adapters.openaip.OpenAIPAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
+import garmintools.openaip.Airport;
 
 abstract class Section<T> {
   final int sectionNumber;
   final GarminAdapter<T> garminAdapter;
+  final OpenAIPAdapter<T> openAIPAdapter;
   final ProtoAdapter<T> protoAdapter;
   final T data;
 
-  Section(int sectionNumber, T data, GarminAdapter<T> garminAdapter, ProtoAdapter<T> protoAdapter) {
+  Section(int sectionNumber, T data, GarminAdapter<T> garminAdapter,
+      OpenAIPAdapter<T> openAIPAdapter, ProtoAdapter<T> protoAdapter) {
     this.sectionNumber = sectionNumber;
     this.data = data;
     this.garminAdapter = garminAdapter;
+    this.openAIPAdapter = openAIPAdapter;
     this.protoAdapter = protoAdapter;
+  }
+
+  /**
+   * This is the second pass to give constructed sections a chance at reading the proto.
+   */
+  public void mergeFromOpenAIP(SectionManager sectionManager, List<Airport> airports) {
+    // default is no-op.
   }
 
   /** This is the second pass to give constructed sections a chance at reading the proto. */

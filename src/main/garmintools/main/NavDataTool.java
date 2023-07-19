@@ -31,8 +31,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Ints;
 
@@ -54,6 +58,7 @@ public class NavDataTool {
       System.out.println("NavDataTool print garmin.bin");
       System.out.println("NavDataTool decode garmin.bin proto.bin");
       System.out.println("NavDataTool encode proto.bin garmin.bin");
+      System.out.println("NavDataTool parse openAIP-airports.json proto.bin");
       System.out.println("NavDataTool toc garmin.bin");
       System.exit(-1);
     }
@@ -62,24 +67,28 @@ public class NavDataTool {
   private void run() throws Exception {
     printHelpAndExitIf(args.length == 0);
     switch (args[0].toLowerCase()) {
-      case "print":
-        printHelpAndExitIf(args.length != 2);
-        printGarminFile(new File(args[1]));
-        break;
-      case "encode":
-        printHelpAndExitIf(args.length != 3);
-        encodeGarminFile(new File(args[1]), new File(args[2]));
-        break;
-      case "decode":
-        printHelpAndExitIf(args.length != 3);
-        decodeGarminFile(new File(args[1]), new File(args[2]));
-        break;
-      case "toc":
-        printHelpAndExitIf(args.length != 2);
-        printTableOfContents(new File(args[1]));
-        break;
-      default:
-        printHelpAndExitIf(true);
+    case "print":
+      printHelpAndExitIf(args.length != 2);
+      printGarminFile(new File(args[1]));
+      break;
+    case "encode":
+      printHelpAndExitIf(args.length != 3);
+      encodeGarminFile(new File(args[1]), new File(args[2]));
+      break;
+    case "decode":
+      printHelpAndExitIf(args.length != 3);
+      decodeGarminFile(new File(args[1]), new File(args[2]));
+      break;
+    case "parse":
+      printHelpAndExitIf(args.length != 3);
+      parseOpenAIPFile(new File(args[1]), new File(args[2]));
+      break;
+    case "toc":
+      printHelpAndExitIf(args.length != 2);
+      printTableOfContents(new File(args[1]));
+      break;
+    default:
+      printHelpAndExitIf(true);
     }
   }
 
@@ -103,7 +112,7 @@ public class NavDataTool {
     inputStream.close();
   }
 
-  private void encodeGarminFile(File protoFile, File garminDataFile) throws IOException  {
+  private void encodeGarminFile(File protoFile, File garminDataFile) throws IOException {
     FileInputStream inputStream = new FileInputStream(protoFile);
     FileOutputStream outputStream = new FileOutputStream(garminDataFile);
     logger.info(String.format("Reading from %s", protoFile.getAbsolutePath()));
@@ -114,12 +123,31 @@ public class NavDataTool {
     dataFile.writeToGarmin(outputStream);
   }
 
-  private void decodeGarminFile(File garminDataFile, File protoFile) throws IOException  {
+  private void decodeGarminFile(File garminDataFile, File protoFile) throws IOException {
     FileInputStream inputStream = new FileInputStream(garminDataFile);
     FileOutputStream outputStream = new FileOutputStream(protoFile);
     logger.info(String.format("Reading from %s", garminDataFile.getAbsolutePath()));
-    GarminNavigationDataFile dataFile =
-        new NavigationDataFileFactory().createFromGarmin(inputStream, garminDataFile.length());
+    GarminNavigationDataFile dataFile = new NavigationDataFileFactory()
+        .createFromGarmin(inputStream, garminDataFile.length());
+    logger.info(String.format("Write to %s", protoFile.getAbsolutePath()));
+    Proto.NavigationData.Builder protoBuilder = Proto.NavigationData.newBuilder();
+    dataFile.writeToProto(protoBuilder);
+    protoBuilder.build().writeTo(outputStream);
+  }
+
+  private void parseOpenAIPFile(File openAIPFile, File protoFile) throws IOException {
+    FileInputStream inputStream = new FileInputStream(openAIPFile);
+    FileOutputStream outputStream = new FileOutputStream(protoFile);
+
+    logger.info(String.format("Reading from %s", openAIPFile.getAbsolutePath()));
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    List<Airport> airports = objectMapper.readValue(inputStream,
+        new TypeReference<List<Airport>>() {
+        });
+    OpenAIPNavigationDataFile dataFile = new NavigationDataFileFactory()
+        .createFromOpenAIP(airports);
+
     logger.info(String.format("Write to %s", protoFile.getAbsolutePath()));
     Proto.NavigationData.Builder protoBuilder = Proto.NavigationData.newBuilder();
     dataFile.writeToProto(protoBuilder);

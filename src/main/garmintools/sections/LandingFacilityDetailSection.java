@@ -22,6 +22,8 @@ import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.garmin.GarminOutput;
 import garmintools.adapters.garmin.LandingFacilityDetailGarminAdapter;
 import garmintools.adapters.garmin.LandingFacilityDetailGarminAdapter.GarminOutputAndIndexToOffset;
+import garmintools.adapters.openaip.LandingFacilityDetailOpenAIPAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
 import garmintools.adapters.proto.LandingFacilityDetailProtoAdapter;
 import garmintools.adapters.proto.ProtoAdapter;
 import garmintools.keys.IndexForeignKey;
@@ -41,8 +43,9 @@ public class LandingFacilityDetailSection extends Section<List<LandingFacilityDe
 
   LandingFacilityDetailSection(int sectionNumber, List<LandingFacilityDetail> data,
       GarminAdapter<List<LandingFacilityDetail>> garminAdapter,
+      OpenAIPAdapter<List<LandingFacilityDetail>> openAIPAdapter,
       ProtoAdapter<List<LandingFacilityDetail>> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
     ImmutableMap.Builder<Integer, Integer> mapBuilder = ImmutableMap.builder();
     for (int index = 0; index < data.size(); ++index) {
       mapBuilder.put(data.get(index).sectionOffset, index);
@@ -81,6 +84,7 @@ public class LandingFacilityDetailSection extends Section<List<LandingFacilityDe
     Factory() {
       super(Ids.LANDING_FACILITY_DETAIL_SECTION,
           new LandingFacilityDetailGarminAdapter(),
+          new LandingFacilityDetailOpenAIPAdapter(),
           new LandingFacilityDetailProtoAdapter(),
           LandingFacilityDetailSection.class);
     }
@@ -88,7 +92,7 @@ public class LandingFacilityDetailSection extends Section<List<LandingFacilityDe
     @Override
     public LandingFacilityDetailSection createFromProto(NavigationData proto) {
       return new LandingFacilityDetailSection(sectionNumber, new ArrayList<LandingFacilityDetail>(),
-          garminAdapter, protoAdapter);
+          garminAdapter, openAIPAdapter, protoAdapter);
     }
   }
 }

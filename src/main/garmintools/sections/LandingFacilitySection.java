@@ -18,6 +18,8 @@ package garmintools.sections;
 
 import garmintools.Proto;
 import garmintools.adapters.garmin.LandingFacilityGarminAdapter;
+import garmintools.adapters.openaip.LandingFacilityOpenAIPAdapter;
+import garmintools.adapters.openaip.OpenAIPAdapter;
 import garmintools.adapters.garmin.GarminAdapter;
 import garmintools.adapters.garmin.GarminOutput;
 import garmintools.adapters.proto.LandingFacilityProtoAdapter;
@@ -31,14 +33,16 @@ import java.util.List;
 public class LandingFacilitySection extends Section<List<LandingFacility>> {
   LandingFacilitySection(int sectionNumber, List<LandingFacility> data,
       GarminAdapter<List<LandingFacility>> garminAdapter,
+      OpenAIPAdapter<List<LandingFacility>> openAIPAdapter,
       ProtoAdapter<List<LandingFacility>> protoAdapter) {
-    super(sectionNumber, data, garminAdapter, protoAdapter);
+    super(sectionNumber, data, garminAdapter, openAIPAdapter, protoAdapter);
   }
 
   LandingFacilitySection(int sectionNumber,
       GarminAdapter<List<LandingFacility>> garminAdapter,
+      OpenAIPAdapter<List<LandingFacility>> openAIPAdapter,
       ProtoAdapter<List<LandingFacility>> protoAdapter) {
-    super(sectionNumber, new ArrayList<LandingFacility>(), garminAdapter, protoAdapter);
+    super(sectionNumber, new ArrayList<LandingFacility>(), garminAdapter, openAIPAdapter, protoAdapter);
   }
 
   @Override
@@ -83,13 +87,14 @@ public class LandingFacilitySection extends Section<List<LandingFacility>> {
     Factory() {
       super(Ids.LANDING_FACILITY_SECTION,
           new LandingFacilityGarminAdapter(),
+          new LandingFacilityOpenAIPAdapter(),
           new LandingFacilityProtoAdapter(),
           LandingFacilitySection.class);
     }
 
     @Override
     public LandingFacilitySection createFromProto(Proto.NavigationData proto) {
-      return new LandingFacilitySection(sectionNumber, garminAdapter, protoAdapter);
+      return new LandingFacilitySection(sectionNumber, garminAdapter, openAIPAdapter, protoAdapter);
     }
   }
 }

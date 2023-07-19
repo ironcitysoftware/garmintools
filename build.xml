@@ -19,6 +19,9 @@
 
   <path id="main-classpath">
     <path location="lib/guava-18.0.jar" />
+    <path location="lib/jackson-annotations-2.15.2.jar" />
+    <path location="lib/jackson-core-2.15.2.jar" />
+    <path location="lib/jackson-databind-2.15.2.jar" />
     <path location="lib/protobuf-2.6.1.jar" />
     <path location="${bin}" />
   </path>
