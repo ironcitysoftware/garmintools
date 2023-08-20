@@ -45,7 +45,7 @@ public class Ids {
   public static final int EXPANDED_AIRSPACE_ABBREVIATION_SECTION2 = 81;
   public static final int BRIEF_AIRSPACE_TYPE_SECTION2 = 87;
 
-  public static final int MAX_SECTION_NUMBER = 94;
+  public static final int MAX_SECTION_NUMBER = 99;
 
   public static final int RUNWAY_NUMBER_SUFFIX_TABLE = 10001;
   public static final int AIRSPACE_TABLE = 10002;

@@ -19,7 +19,7 @@
 
   <path id="main-classpath">
     <path location="lib/guava-18.0.jar" />
-    <path location="lib/protobuf-2.6.1.jar" />
+    <path location="lib/protobuf-3.24.0.jar" />
     <path location="${bin}" />
   </path>
 
