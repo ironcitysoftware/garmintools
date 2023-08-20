@@ -46,7 +46,8 @@ public class MetadataGarminAdapter implements GarminAdapter<Proto.Metadata> {
   private static final int COVERAGE_REGION_LENGTH = 30;
   private static final int COVERAGE_REGION_PAD_LENGTH = 25;
   private static final int COPYRIGHT_LINE_LENGTH = 25;
-  private static final int TRAILING_ZERO_BYTE_LENGTH = 272;
+  private static final int INTERMEDIATE_ZERO_BYTE_LENGTH = 65;
+  private static final int TRAILING_ZERO_BYTE_LENGTH = 206;
 
   @Override
   public Proto.Metadata read(DataLengthSection dataLengthSection, TableOfContentsEntry entry, ByteBuffer byteBuffer) {
@@ -78,6 +79,12 @@ public class MetadataGarminAdapter implements GarminAdapter<Proto.Metadata> {
     builder.setCopyrightLine2(new String(copyrightLineBytes, Charsets.US_ASCII).trim());
 
     builder.setUnknownData4(byteBuffer.get());
+
+    for (int i = 0; i < INTERMEDIATE_ZERO_BYTE_LENGTH; ++i) {
+      Preconditions.checkState(byteBuffer.get() == 0);
+    }
+
+    builder.setUnknownData5(byteBuffer.get());
 
     while(byteBuffer.hasRemaining()) {
       Preconditions.checkState(byteBuffer.get() == 0);
@@ -115,6 +122,10 @@ public class MetadataGarminAdapter implements GarminAdapter<Proto.Metadata> {
     writeStringAndPadWithSpace(output, data.getCopyrightLine1(), COPYRIGHT_LINE_LENGTH);
     writeStringAndPadWithSpace(output, data.getCopyrightLine2(), COPYRIGHT_LINE_LENGTH);
     output.write(data.getUnknownData4());
+    for (int i = 0; i < INTERMEDIATE_ZERO_BYTE_LENGTH; ++i) {
+      output.write(0);
+    }
+    output.write(data.getUnknownData5());
     for (int i = 0; i < TRAILING_ZERO_BYTE_LENGTH; ++i) {
       output.write(0);
     }

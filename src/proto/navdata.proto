@@ -58,6 +58,7 @@ message Metadata {
   optional int32 unknown_data_2 = 1001;
   optional int32 unknown_data_3 = 1002;
   optional int32 unknown_data_4 = 1003;
+  optional int32 unknown_data_5 = 1004;
 }
 
 message TableOfContents {
