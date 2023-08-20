@@ -15,7 +15,7 @@
 #  limitations under the License.
 #
 CLASSPATH=lib/guava-18.0.jar
-CLASSPATH=$CLASSPATH:lib/protobuf-2.6.1.jar
+CLASSPATH=$CLASSPATH:lib/protobuf-3.24.0.jar
 CLASSPATH=$CLASSPATH:garmintools.jar
 CLASSPATH=$CLASSPATH:bin
 java -cp $CLASSPATH garmintools.main.NavDataTool $@
